@@ -1,0 +1,10 @@
+{% block content %}
+
+<form action="/signin/" action="{% url 'signin' %}" method="POST">
+  {% csrf_token %}
+  <h1>Signin</h1>
+  {{error}}
+  {{ form.as_p }}
+  <button>Signin</button>
+</form>
+{% endblock %}
