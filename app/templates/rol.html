@@ -1,26 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Roles</h1>
-<a class="btn btn-primary" href="#" role="button">Crear</a>
-<table class="table table-striped">
-  <thead>
+<h1>Gestión de rol</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
     <tr>
-      <td scope="col">Id</td>
+      <td scope="col ">Id</td>
       <td scope="col">Rol</td>
       <td scope="col">Descripción</td>
       <td scope="col">Estado</td>
       <th colspan="2">Opciones</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody class="bg-secondary-subtle">
+    {% for rol in roles %}
     <tr>
-        <td>Id rol</td>
-        <td>Nombre rol</td>
-        <td>Descripción rol</td>
-        <td>Estado Rol</td>
-        <td><a class="btn btn-primary" href="#" role="button">Modificar</a></td>
+        <td>{{ rol.id }}</td>
+        <td>{{ rol.nombre_rol }}</td>
+        <td>{{ rol.descripcion }}</td>
+        <td>{{ rol.estado }}</td>
+        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'modificar' rol.id %}" role="button">
+          <i class="bi bi-pencil-square"></i>
+          Modificar
+        </a></td>
     </tr>
+    {% endfor %}
   </tbody>
 </table>
 
