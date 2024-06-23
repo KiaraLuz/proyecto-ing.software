@@ -22,5 +22,9 @@ from app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name="home"),
-    path('roles/', views.roles, name="roles")
+    path('roles/', views.roles, name="roles"),
+    path('roles/crear/', views.rol_crear, name='crear'),
+    path('roles/modificar/<int:rol_id>', views.rol_modificar, name='modificar'),
+    path('logout/', views.signout, name="logout"),
+    path('signin/', views.signin, name="signin"),
 ]
