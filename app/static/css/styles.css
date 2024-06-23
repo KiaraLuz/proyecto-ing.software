@@ -1,23 +1,23 @@
-body{
-    background-color: #242424;
+body {
+  /* background-color: #111; */
 }
-.tb{
-    width: 900px;
-    text-align: center;
+
+.tb {
+  width: 900px;
+  text-align: center;
 }
-.encabezado-tabla{
-    background-color: #f5ad25;
-    height: 3em;
+.encabezado-tabla {
+  background-color: #f5ad25;
+  height: 3em;
 }
-.btn-color{
-    background-color:  #df4a10;
-    margin: 5px;
-    color: #242424;
-    
+.btn-color {
+  background-color: #df4a10;
+  margin: 5px;
+  color: #242424;
 }
 /* .btn-m:hover{
     background-color: #ffffff;
 } */
-.btn-color:hover{
-    background-color: #d9534f;
+.btn-color:hover {
+  background-color: #d9534f;
 }
