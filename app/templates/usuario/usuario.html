@@ -1,0 +1,27 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Gestión de usuarios</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'usuario_crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+    <tr>
+      <td scope="col">Id</td>
+      <td scope="col">Nombre</td>
+      <td scope="col">Rol</td>
+      <th colspan="2">Opciones</th>
+    </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><a class="btn btn-color btn-m fw-bold" href="#" role="button">
+          <i class="bi bi-pencil-square"></i>
+          Modificar
+        </a></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
