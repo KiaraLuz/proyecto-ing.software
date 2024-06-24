@@ -41,6 +41,10 @@ class UsuarioForm(forms.ModelForm):
         queryset=Rol.objects.all(),
         widget=forms.Select(attrs={"class": "select"}),
     )
+    contraseña_usuario = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={"class": "input"}),  
+    )
 
     def __init__(self, *args, **kwargs):
         super(UsuarioForm, self).__init__(*args, **kwargs)
