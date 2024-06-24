@@ -30,13 +30,13 @@ class UsuarioForm(forms.ModelForm):
         model = Usuario
         fields = "__all__"
 
-    id = forms.CharField(
+    id_usuario = forms.CharField(
         label="ID", widget=forms.TextInput(attrs={"class": "input"})
     )
-    nombre = forms.CharField(
+    nombre_usuario = forms.CharField(
         label="Nombre", widget=forms.TextInput(attrs={"class": "input"})
     )
-    rol = forms.ModelChoiceField(
+    rol_usuario = forms.ModelChoiceField(
         label="Rol",
         queryset=Rol.objects.all(),
         widget=forms.Select(attrs={"class": "select"}),
@@ -46,4 +46,4 @@ class UsuarioForm(forms.ModelForm):
         super(UsuarioForm, self).__init__(*args, **kwargs)
 
         if self.instance.pk:
-            self.fields['id'].disabled = True
+            self.fields['id_usuario'].disabled = True
