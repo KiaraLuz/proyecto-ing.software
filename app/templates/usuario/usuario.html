@@ -13,15 +13,17 @@
     </tr>
   </thead>
   <tbody class="bg-secondary-subtle">
+    {% for usuario in usuarios %}
     <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td><a class="btn btn-color btn-m fw-bold" href="#" role="button">
+        <td>{{ usuario.id_usuario }}</td>
+        <td>{{ usuario.nombre_usuario }}</td>
+        <td>{{ usuario.rol_usuario }}</td>
+        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'usuario_modificar' usuario.id_usuario %}" role="button">
           <i class="bi bi-pencil-square"></i>
           Modificar
         </a></td>
     </tr>
+    {% endfor %}
   </tbody>
 </table>
 {% endblock %}
