@@ -18,6 +18,9 @@ class RolForm(forms.ModelForm):
     estado = forms.BooleanField(
         label="Estado", required=False, widget=forms.CheckboxInput(attrs={"class": "checkbox"})
     )
+    is_admin = forms.BooleanField(
+        label="Nivel Administrador", required=False, widget=forms.CheckboxInput(attrs={"class": "checkbox"})
+    )
 
     def __init__(self, *args, **kwargs):
         super(RolForm, self).__init__(*args, **kwargs)
