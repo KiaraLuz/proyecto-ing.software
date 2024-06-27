@@ -29,6 +29,8 @@ class RolForm(forms.ModelForm):
             self.fields['id'].disabled = True
 
 class UsuarioForm(forms.ModelForm):
+    
+
     class Meta:
         model = Usuario
         fields = "__all__"
@@ -48,9 +50,21 @@ class UsuarioForm(forms.ModelForm):
         label="Contraseña",
         widget=forms.PasswordInput(attrs={"class": "input"}),  
     )
-
+    confirmar_contraseña = forms.CharField(
+        label="Confirmar Contraseña",
+        widget=forms.PasswordInput(attrs={"class": "input"})
+    )
     def __init__(self, *args, **kwargs):
         super(UsuarioForm, self).__init__(*args, **kwargs)
-
         if self.instance.pk:
             self.fields['id_usuario'].disabled = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        contraseña_usuario = cleaned_data.get("contraseña_usuario")
+        confirmar_contraseña = cleaned_data.get("confirmar_contraseña")
+
+        if contraseña_usuario and confirmar_contraseña and contraseña_usuario != confirmar_contraseña:
+            self.add_error('confirmar_contraseña', "Las contraseñas no coinciden.")
+
+        return cleaned_data
