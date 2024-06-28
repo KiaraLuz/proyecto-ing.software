@@ -16,3 +16,9 @@ class Usuario(models.Model):
     nombre_usuario = models.CharField(max_length=50)
     rol_usuario = models.ForeignKey(Rol, on_delete=models.CASCADE)
     contraseña_usuario = models.CharField(max_length=20) 
+class Ingrediente(models.Model):
+    id_ingrediente = models.AutoField(primary_key=True)
+    nombre_ingrediente = models.CharField(max_length=100)  
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2) 
+    unidad = models.CharField(max_length=10)
+    estado_ingrediente = models.CharField(max_length=20)
