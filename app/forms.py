@@ -52,6 +52,7 @@ class UsuarioForm(forms.ModelForm):
         label="Confirmar Contraseña",
         widget=forms.PasswordInput(attrs={"class": "input"})
     )
+
     def __init__(self, *args, **kwargs):
         super(UsuarioForm, self).__init__(*args, **kwargs)
         if self.instance.pk:
@@ -66,20 +67,27 @@ class UsuarioForm(forms.ModelForm):
             self.add_error('confirmar_contraseña', "Las contraseñas no coinciden.")
 
         return cleaned_data
-    
-class IngredienteForm(forms.ModelForm):
-    id_ingrediente = forms.CharField(label="ID", widget=forms.TextInput(attrs={"class": "input"}))
-    nombre_ingrediente = forms.CharField(label="Nombre del Ingrediente", widget=forms.TextInput(attrs={"class": "input"}))
-    cantidad = forms.DecimalField(label="Cantidad", widget=forms.NumberInput(attrs={"class": "input"}))
-    unidad = forms.ChoiceField(label="Unidad", choices=[('KG', 'KG'), ('UNID', 'UNID')], widget=forms.Select(attrs={"class": "input"}))
-    estado_ingrediente = forms.CharField(label="Estado del Ingrediente", widget=forms.TextInput(attrs={"class": "input"}))
 
+class IngredienteForm(forms.ModelForm):
     class Meta:
         model = Ingrediente
         fields = "__all__"
+
+    nombre_ingrediente = forms.CharField(
+        label="Nombre del Ingrediente", widget=forms.TextInput(attrs={"class": "input"})
+    )
+    cantidad = forms.DecimalField(
+        label="Cantidad", widget=forms.NumberInput(attrs={"class": "input"})
+    )
+    unidad = forms.ChoiceField(
+        label="Unidad", choices=[("KG", "KG"), ("UNID", "UNID")], widget=forms.Select(attrs={"class": "input"}),
+    )
+    estado_ingrediente = forms.BooleanField(
+        label="Estado del Ingrediente", required=False, widget=forms.CheckboxInput(attrs={"class": "checkbox"})
+    )
 
     def __init__(self, *args, **kwargs):
         super(IngredienteForm, self).__init__(*args, **kwargs)
 
         if self.instance.pk:
-            self.fields['id_ingrediente'].disabled = True
+            self.fields["id_ingrediente"].disabled = True
