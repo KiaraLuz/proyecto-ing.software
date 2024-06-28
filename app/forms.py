@@ -1,5 +1,5 @@
 from django import forms
-from .models import Rol, Usuario
+from .models import Rol, Usuario,Ingrediente
 
 class RolForm(forms.ModelForm):
     class Meta:
@@ -29,8 +29,6 @@ class RolForm(forms.ModelForm):
             self.fields['id'].disabled = True
 
 class UsuarioForm(forms.ModelForm):
-    
-
     class Meta:
         model = Usuario
         fields = "__all__"
@@ -68,3 +66,20 @@ class UsuarioForm(forms.ModelForm):
             self.add_error('confirmar_contraseña', "Las contraseñas no coinciden.")
 
         return cleaned_data
+    
+class IngredienteForm(forms.ModelForm):
+    id_ingrediente = forms.CharField(label="ID", widget=forms.TextInput(attrs={"class": "input"}))
+    nombre_ingrediente = forms.CharField(label="Nombre del Ingrediente", widget=forms.TextInput(attrs={"class": "input"}))
+    cantidad = forms.DecimalField(label="Cantidad", widget=forms.NumberInput(attrs={"class": "input"}))
+    unidad = forms.ChoiceField(label="Unidad", choices=[('KG', 'KG'), ('UNID', 'UNID')], widget=forms.Select(attrs={"class": "input"}))
+    estado_ingrediente = forms.CharField(label="Estado del Ingrediente", widget=forms.TextInput(attrs={"class": "input"}))
+
+    class Meta:
+        model = Ingrediente
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super(IngredienteForm, self).__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields['id_ingrediente'].disabled = True
