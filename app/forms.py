@@ -5,7 +5,7 @@ from .models import Rol, Usuario, Ingrediente
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
-        exclude = ["id_rol"]  # Excluimos id_rol del formulario
+        exclude = ["id_rol"]
 
     nombre_rol = forms.CharField(
         label="Nombre", widget=forms.TextInput(attrs={"class": "input"})
@@ -40,11 +40,8 @@ class RolForm(forms.ModelForm):
 class UsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = "__all__"
+        exclude = ["id_usuario"]
 
-    id_usuario = forms.CharField(
-        label="ID", widget=forms.TextInput(attrs={"class": "input"})
-    )
     nombre_usuario = forms.CharField(
         label="Nombre", widget=forms.TextInput(attrs={"class": "input"})
     )
@@ -64,8 +61,6 @@ class UsuarioForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(UsuarioForm, self).__init__(*args, **kwargs)
-        if self.instance.pk:
-            self.fields["id_usuario"].disabled = True
 
     def clean(self):
         cleaned_data = super().clean()
@@ -85,11 +80,8 @@ class UsuarioForm(forms.ModelForm):
 class IngredienteForm(forms.ModelForm):
     class Meta:
         model = Ingrediente
-        fields = "__all__"
+        exclude = ["id_ingrediente"]
 
-    id_ingrediente = forms.CharField(
-        label="ID del Ingrediente", widget=forms.TextInput(attrs={"class": "input"})
-    )
     nombre_ingrediente = forms.CharField(
         label="Nombre del Ingrediente", widget=forms.TextInput(attrs={"class": "input"})
     )
@@ -109,6 +101,3 @@ class IngredienteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(IngredienteForm, self).__init__(*args, **kwargs)
-
-        if self.instance.pk:
-            self.fields["id_ingrediente"].disabled = True
