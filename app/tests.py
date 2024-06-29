@@ -2,7 +2,8 @@ from django.test import TestCase
 from django.urls import reverse
 from .models import Rol
 from .forms import RolForm
-
+from .models import Ingrediente
+from .forms import IngredienteForm
 
 class RolFormTestCase(TestCase):
     def setUp(self):
@@ -59,3 +60,56 @@ class RolFormTestCase(TestCase):
             form.errors["__all__"][0],
             "Datos incompletos",
         )
+
+class IngredienteFormTestCase(TestCase):
+    def setUp(self):
+        self.ingrediente1 = Ingrediente.objects.create(
+            nombre_ingrediente="Tomate",
+            cantidad=2.0,
+            unidad="UNID",
+            estado_ingrediente=True,
+        )
+
+    def test_crear_ingrediente_form(self):
+        form_data = {
+            "nombre_ingrediente": "Lechuga",
+            "cantidad": 1.0,
+            "unidad": "UNID",
+            "estado_ingrediente": True,
+        }
+        form = IngredienteForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        ingrediente = form.save()
+        self.assertEqual(ingrediente.nombre_ingrediente, "Lechuga")
+        self.assertEqual(ingrediente.cantidad, 1.0)
+        self.assertEqual(ingrediente.unidad, "UNID")
+        self.assertEqual(ingrediente.estado_ingrediente, True)
+
+    def test_modificar_ingrediente_form(self):
+        form_data = {
+            "nombre_ingrediente": "Tomate Cherry",
+            "cantidad": 3.0,
+            "unidad": "UNID",
+            "estado_ingrediente": True,
+        }
+        ingrediente = Ingrediente.objects.get(nombre_ingrediente="Tomate")
+        form = IngredienteForm(data=form_data, instance=ingrediente)
+        self.assertTrue(form.is_valid())
+        ingrediente_modificado = form.save()
+        self.assertEqual(ingrediente_modificado.nombre_ingrediente, "Tomate Cherry")
+        self.assertEqual(ingrediente_modificado.cantidad, 3.0)
+        self.assertEqual(ingrediente_modificado.unidad, "UNID")
+        self.assertEqual(ingrediente_modificado.estado_ingrediente, True)
+
+    def test_form_validations(self):
+        form_data = {
+            "nombre_ingrediente": "",
+            "cantidad": "",
+            "unidad": "",
+            "estado_ingrediente": True,
+        }
+        form = IngredienteForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("nombre_ingrediente", form.errors)
+        self.assertIn("cantidad", form.errors)
+        self.assertIn("unidad", form.errors)
