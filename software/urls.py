@@ -14,20 +14,32 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path
 from app import views
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.home, name="home"),
-    path('roles/', views.roles, name="roles"),
-    path('roles/crear/', views.rol_crear, name='rol_crear'),
-    path('roles/modificar/<int:rol_id>', views.rol_modificar, name='rol_modificar'),
-    path('logout/', views.signout, name="logout"),
-    path('signin/', views.signin, name="signin"),
-    path('usuarios/', views.usuarios, name="usuarios"),
-    path('usuarios/crear/', views.usuario_crear, name='usuario_crear'),
-    path('usuarios/modificar/<int:usuario_id>', views.usuario_modificar, name='usuario_modificar'),
+    path("admin/", admin.site.urls),
+    path("", views.home, name="home"),
+    path("roles/", views.roles, name="roles"),
+    path("roles/crear/", views.rol_crear, name="rol_crear"),
+    path("roles/modificar/<int:rol_id>", views.rol_modificar, name="rol_modificar"),
+    path("logout/", views.signout, name="logout"),
+    path("signin/", views.signin, name="signin"),
+    path("usuarios/", views.usuarios, name="usuarios"),
+    path("usuarios/crear/", views.usuario_crear, name="usuario_crear"),
+    path(
+        "usuarios/modificar/<int:usuario_id>",
+        views.usuario_modificar,
+        name="usuario_modificar",
+    ),
+    path("ingredientes/", views.ingredientes, name="ingredientes"),
+    path("ingredientes/crear/", views.ingrediente_crear, name="ingrediente_crear"),
+    path(
+        "ingredientes/modificar/<int:ingrediente_id>",
+        views.ingrediente_modificar,
+        name="ingrediente_modificar",
+    ),
 ]
