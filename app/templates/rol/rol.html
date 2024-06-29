@@ -16,11 +16,11 @@
   <tbody class="bg-secondary-subtle">
     {% for rol in roles %}
     <tr>
-        <td>{{ rol.id }}</td>
+        <td>{{ rol.id_rol }}</td>
         <td>{{ rol.nombre_rol }}</td>
         <td>{{ rol.descripcion }}</td>
         <td>{{ rol.estado }}</td>
-        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'rol_modificar' rol.id %}" role="button">
+        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'rol_modificar' rol.id_rol %}" role="button">
           <i class="bi bi-pencil-square"></i>
           Modificar
         </a></td>
