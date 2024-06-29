@@ -73,6 +73,9 @@ class IngredienteForm(forms.ModelForm):
         model = Ingrediente
         fields = "__all__"
 
+    id_ingrediente = forms.CharField(
+        label="ID del Ingrediente", widget=forms.TextInput(attrs={"class": "input"})
+    )
     nombre_ingrediente = forms.CharField(
         label="Nombre del Ingrediente", widget=forms.TextInput(attrs={"class": "input"})
     )
