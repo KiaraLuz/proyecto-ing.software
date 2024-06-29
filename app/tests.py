@@ -5,6 +5,7 @@ from .forms import RolForm
 from .models import Ingrediente
 from .forms import IngredienteForm
 
+
 class RolFormTestCase(TestCase):
     def setUp(self):
         self.rol1 = Rol.objects.create(
@@ -16,23 +17,23 @@ class RolFormTestCase(TestCase):
 
     def test_crear_rol_form(self):
         form_data = {
-            "nombre_rol": "User",
-            "descripcion": "Usuario",
+            "nombre_rol": "Vendedor",
+            "descripcion": "Es un rol para vendedores",
             "estado": True,
             "is_admin": False,
         }
         form = RolForm(data=form_data)
         self.assertTrue(form.is_valid())
         rol = form.save()
-        self.assertEqual(rol.nombre_rol, "User")
-        self.assertEqual(rol.descripcion, "Usuario")
+        self.assertEqual(rol.nombre_rol, "Vendedor")
+        self.assertEqual(rol.descripcion, "Es un rol para vendedores")
         self.assertEqual(rol.estado, True)
         self.assertEqual(rol.is_admin, False)
 
     def test_modificar_rol_form(self):
         form_data = {
-            "nombre_rol": "SuperAdmin",
-            "descripcion": "Super Administrador",
+            "nombre_rol": "Almacén",
+            "descripcion": "Es un rol para almacén",
             "estado": True,
             "is_admin": True,
         }
@@ -40,8 +41,8 @@ class RolFormTestCase(TestCase):
         form = RolForm(data=form_data, instance=rol)
         self.assertTrue(form.is_valid())
         rol_modificado = form.save()
-        self.assertEqual(rol_modificado.nombre_rol, "SuperAdmin")
-        self.assertEqual(rol_modificado.descripcion, "Super Administrador")
+        self.assertEqual(rol_modificado.nombre_rol, "Almacén")
+        self.assertEqual(rol_modificado.descripcion, "Es un rol para almacén")
         self.assertEqual(rol_modificado.estado, True)
         self.assertEqual(rol_modificado.is_admin, True)
 
@@ -60,6 +61,7 @@ class RolFormTestCase(TestCase):
             form.errors["__all__"][0],
             "Datos incompletos",
         )
+
 
 class IngredienteFormTestCase(TestCase):
     def setUp(self):
