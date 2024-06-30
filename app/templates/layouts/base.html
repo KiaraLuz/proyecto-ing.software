@@ -33,25 +33,17 @@
             overflow-x: hidden;
             padding-top: 20px;
         }
-
         .navbar .nav-link {
             color: #333; 
-            padding: 6px 8px;
             text-decoration: none;
             display: flex;
             align-items: center;
         }
-
         .navbar .nav-link:hover {
             background-color: #ea9d44; 
         }
-        .content-container {
-            margin-left: 170px; 
-            padding: 20px;
-        }
         .logo-image {
-            max-height: 120px;             
-            display: block; 
+            max-height: 120px;
         }
         .icon-image {
             width: 20px; 
@@ -62,42 +54,48 @@
 </head>
 <body>
     <main>
-        <nav class="navbar navbar-expand-lg navbar-light position-fixed-left">
-            <div class="container-fluid flex-column align-items-start">
-                <a class="navbar-brand mb-3 d-flex flex-column align-items-center" href="{% url 'home' %}">
-                    <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="logo-image">
-                    Mi Gordis
+        <nav class="navbar navbar-expand-lg navbar-light align-items-start">
+            <div class="d-flex flex-column align-items-center justify-content-start h-100 w-100">
+                <a class="navbar-brand d-flex flex-column m-auto gap-2" href="{% url 'home' %}">
+                    <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="logo-image rounded-circle">
+                    <h4 class="text-center">Mi Gordis</h4>
                 </a>
-                <div class="collapse navbar-collapse flex-column align-items-start" id="navbarNav">
-                    <ul class="navbar-nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'roles' %}">
-                                <img src="{% static 'icons/roles.png' %}" alt="Roles" class="icon-image"> Roles
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'usuarios' %}">
-                                <img src="{% static 'icons/usuarios.png' %}" alt="Usuarios" class="icon-image"> Usuarios
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'ingredientes' %}">
-                                <img src="{% static 'icons/ingredientes.png' %}" alt="Ingredientes" class="icon-image"> Ingredientes
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">
-                                <img src="{% static 'icons/logout.png' %}" alt="Logout" class="icon-image"> Logout
-                            </a>
-                        </li>
+                <div class="d-flex flex-column h-100" id="navbarNav">
+                    <ul class="navbar-nav flex-column h-100 justify-content-between">
+                        <div>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'roles' %}">
+                                    <img src="{% static 'icons/roles.png' %}" alt="Roles" class="icon-image"> Roles
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'usuarios' %}">
+                                    <img src="{% static 'icons/usuarios.png' %}" alt="Usuarios" class="icon-image"> Usuarios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'ingredientes' %}">
+                                    <img src="{% static 'icons/ingredientes.png' %}" alt="Ingredientes" class="icon-image"> Ingredientes
+                                </a>
+                            </li>
+                        </div>
+                        <div>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'logout' %}">
+                                    <img src="{% static 'icons/logout.png' %}" alt="Logout" class="icon-image"> Logout
+                                </a>
+                            </li>
+                        </div>
                     </ul>
+
                 </div>
             </div>
         </nav>
-
+    
         <div class="container mt-4">
             {% block content %}{% endblock %}
         </div>
     </main>
+    
 </body>
 </html>
