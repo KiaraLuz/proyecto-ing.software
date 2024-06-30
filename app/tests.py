@@ -1,9 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
-from .models import Rol
-from .forms import RolForm
-from .models import Ingrediente
-from .forms import IngredienteForm
+from .models import Rol, Usuario, Ingrediente
+from .forms import RolForm, UsuarioForm, IngredienteForm
 
 
 class RolFormTestCase(TestCase):
@@ -61,6 +59,60 @@ class RolFormTestCase(TestCase):
             form.errors["__all__"][0],
             "Datos incompletos",
         )
+
+
+class UsuarioFormTestCase(TestCase):
+    def setUp(self):
+        self.rol = Rol.objects.create(
+            nombre_rol="Administrador",
+            descripcion="Rol de Administrador",
+            estado=True,
+            is_admin=False,
+        )
+
+    def test_crear_usuario_form(self):
+        form_data = {
+            "nombre_usuario": "Andres",
+            "rol_usuario": self.rol.id_rol,
+            "contraseña_usuario": "userPASS123",
+            "confirmar_contraseña": "userPASS123",
+        }
+        form = UsuarioForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        usuario = form.save()
+        self.assertEqual(usuario.nombre_usuario, "Andres")
+        self.assertEqual(usuario.rol_usuario, self.rol)
+        self.assertTrue(usuario.check_password("userPASS123"))
+
+    def test_modificar_usuario_form(self):
+        usuario = Usuario.objects.create(
+            nombre_usuario="Andres", rol_usuario=self.rol, contraseña_usuario="userPASS123"
+        )
+        form_data = {
+            "nombre_usuario": "Andrea",
+            "rol_usuario": self.rol.id_rol,
+            "contraseña_usuario": "newPASS456",
+            "confirmar_contraseña": "newPASS456",
+        }
+        form = UsuarioForm(data=form_data, instance=usuario)
+        self.assertTrue(form.is_valid())
+        usuario_modificado = form.save()
+        self.assertEqual(usuario_modificado.nombre_usuario, "Andrea")
+        self.assertEqual(usuario_modificado.rol_usuario, self.rol)
+        self.assertTrue(usuario_modificado.check_password("newPASS456"))
+
+    def test_form_validations(self):
+        form_data = {
+            "nombre_usuario": "",
+            "rol_usuario": "",
+            "contraseña_usuario": "userPASS123",
+            "confirmar_contraseña": "",
+        }
+        form = UsuarioForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("nombre_usuario", form.errors)
+        self.assertIn("rol_usuario", form.errors)
+        self.assertIn("confirmar_contraseña", form.errors)
 
 
 class IngredienteFormTestCase(TestCase):

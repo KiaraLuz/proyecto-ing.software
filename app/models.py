@@ -19,6 +19,16 @@ class Usuario(models.Model):
     rol_usuario = models.ForeignKey(Rol, on_delete=models.CASCADE)
     contraseña_usuario = models.CharField(max_length=20)
 
+    @property
+    def is_admin(self):
+        return self.rol_usuario.is_admin
+
+    def check_password(self, password):
+        return self.contraseña_usuario == password
+
+    def __str__(self):
+        return self.nombre_usuario
+
 
 class Ingrediente(models.Model):
     id_ingrediente = models.AutoField(primary_key=True)
