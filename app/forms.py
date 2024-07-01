@@ -1,5 +1,6 @@
 from django import forms
 from .models import Rol, Usuario, Ingrediente
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
 class RolForm(forms.ModelForm):
@@ -37,44 +38,56 @@ class RolForm(forms.ModelForm):
         return cleaned_data
 
 
-class UsuarioForm(forms.ModelForm):
+class UsuarioForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
     class Meta:
         model = Usuario
-        exclude = ["id_usuario"]
-
-    nombre_usuario = forms.CharField(
-        label="Nombre", widget=forms.TextInput(attrs={"class": "input"})
-    )
-    rol_usuario = forms.ModelChoiceField(
-        label="Rol",
-        queryset=Rol.objects.all(),
-        widget=forms.Select(attrs={"class": "select"}),
-    )
-    contraseña_usuario = forms.CharField(
-        label="Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "input"}),
-    )
-    confirmar_contraseña = forms.CharField(
-        label="Confirmar Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "input"}),
-    )
+        fields = ("username", "email", "password1", "password2", "rol")
 
     def __init__(self, *args, **kwargs):
-        super(UsuarioForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.fields["rol"].required = False
+
+
+class UsuarioForm(UserChangeForm):
+    password = forms.CharField(
+        label="Password", required=False, widget=forms.PasswordInput
+    )
+    password_confirm = forms.CharField(
+        label="Confirm Password", required=False, widget=forms.PasswordInput
+    )
+
+    class Meta:
+        model = Usuario
+        fields = (
+            "username",
+            "password",
+            "password_confirm",
+            "rol",
+        )
 
     def clean(self):
         cleaned_data = super().clean()
-        contraseña_usuario = cleaned_data.get("contraseña_usuario")
-        confirmar_contraseña = cleaned_data.get("confirmar_contraseña")
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
 
-        if (
-            contraseña_usuario
-            and confirmar_contraseña
-            and contraseña_usuario != confirmar_contraseña
-        ):
-            self.add_error("confirmar_contraseña", "Las contraseñas no coinciden.")
+        if password and password_confirm:
+            if password != password_confirm:
+                raise forms.ValidationError(
+                    "Las contraseñas no coinciden. Por favor, inténtelo de nuevo."
+                )
 
         return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data["password"]
+        if password:
+            user.set_password(password)
+            if commit:
+                user.save()
+        return user
 
 
 class IngredienteForm(forms.ModelForm):

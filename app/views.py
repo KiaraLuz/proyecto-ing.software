@@ -4,6 +4,7 @@ from app.forms import RolForm, UsuarioForm, IngredienteForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from .decorators import admin_required
 
 
 # Create your views here.
@@ -42,6 +43,7 @@ def signout(request):
 
 
 @login_required
+@admin_required
 def roles(request):
     roles = Rol.objects.all()
     contexto = {"roles": roles}
@@ -49,6 +51,7 @@ def roles(request):
 
 
 @login_required
+@admin_required
 def rol_crear(request):
     if request.method == "POST":
         form = RolForm(request.POST)
@@ -62,6 +65,7 @@ def rol_crear(request):
 
 
 @login_required
+@admin_required
 def rol_modificar(request, rol_id):
     rol = get_object_or_404(Rol, id_rol=rol_id)
     if request.method == "POST":
@@ -76,6 +80,7 @@ def rol_modificar(request, rol_id):
 
 
 @login_required
+@admin_required
 def usuarios(request):
     usuarios = Usuario.objects.all()
     contexto = {"usuarios": usuarios}
@@ -83,11 +88,12 @@ def usuarios(request):
 
 
 @login_required
+@admin_required
 def usuario_crear(request):
     if request.method == "POST":
         form = UsuarioForm(request.POST)
         if form.is_valid():
-            form.save(commit=True)
+            form.save()
             return redirect("usuarios")
     else:
         form = UsuarioForm()
@@ -96,12 +102,13 @@ def usuario_crear(request):
 
 
 @login_required
+@admin_required
 def usuario_modificar(request, usuario_id):
-    usuario = get_object_or_404(Usuario, id_usuario=usuario_id)
+    usuario = get_object_or_404(Usuario, id=usuario_id)
     if request.method == "POST":
         form = UsuarioForm(request.POST, instance=usuario)
         if form.is_valid():
-            form.save(commit=True)
+            form.save()
             return redirect("usuarios")
     else:
         form = UsuarioForm(instance=usuario)
@@ -110,6 +117,7 @@ def usuario_modificar(request, usuario_id):
 
 
 @login_required
+@admin_required
 def ingredientes(request):
     ingredientes = Ingrediente.objects.all()
     contexto = {"ingredientes": ingredientes}
@@ -117,6 +125,7 @@ def ingredientes(request):
 
 
 @login_required
+@admin_required
 def ingrediente_crear(request):
     if request.method == "POST":
         form = IngredienteForm(request.POST)
@@ -130,6 +139,7 @@ def ingrediente_crear(request):
 
 
 @login_required
+@admin_required
 def ingrediente_modificar(request, ingrediente_id):
     ingrediente = get_object_or_404(Ingrediente, id_ingrediente=ingrediente_id)
     if request.method == "POST":
