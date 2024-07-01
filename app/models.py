@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
 # Create your models here.
@@ -13,21 +14,16 @@ class Rol(models.Model):
         return self.nombre_rol
 
 
-class Usuario(models.Model):
-    id_usuario = models.AutoField(primary_key=True)
-    nombre_usuario = models.CharField(max_length=50)
-    rol_usuario = models.ForeignKey(Rol, on_delete=models.CASCADE)
-    contraseña_usuario = models.CharField(max_length=20)
-
-    @property
-    def is_admin(self):
-        return self.rol_usuario.is_admin
-
-    def check_password(self, password):
-        return self.contraseña_usuario == password
+class Usuario(AbstractUser):
+    id = models.AutoField(primary_key=True)
+    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, null=True, blank=False)
 
     def __str__(self):
-        return self.nombre_usuario
+        return self.username
+
+    @property
+    def is_rol_admin(self):
+        return self.rol.is_admin if self.rol else False
 
 
 class Ingrediente(models.Model):
