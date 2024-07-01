@@ -31,7 +31,7 @@ urlpatterns = [
     path("usuarios/", views.usuarios, name="usuarios"),
     path("usuarios/crear/", views.usuario_crear, name="usuario_crear"),
     path(
-        "usuarios/modificar/<int:usuario_id>",
+        "usuarios/modificar/<int:usuario_id>/",
         views.usuario_modificar,
         name="usuario_modificar",
     ),

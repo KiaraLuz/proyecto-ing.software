@@ -1,27 +1,29 @@
 {% extends 'layouts/base.html' %}
 
 {% block content %}
-<h1>Gestión de usuario</h1>
+<h1>Gestión de Usuarios</h1>
 <a class="btn btn-color fw-bold mb-3" href="{% url 'usuario_crear' %}" role="button">Crear</a>
 <table class="tb">
   <thead class="encabezado-tabla fw-bold">
     <tr>
-      <td scope="col">Id</td>
-      <td scope="col">Nombre</td>
-      <td scope="col">Rol</td>
+      <th scope="col">Id</th>
+      <th scope="col">Username</th>
+      <th scope="col">Rol</th>
+      <th scope="col">Es Admin</th>
       <th colspan="2">Opciones</th>
     </tr>
   </thead>
   <tbody class="bg-secondary-subtle">
     {% for usuario in usuarios %}
     <tr>
-        <td>{{ usuario.id_usuario }}</td>
-        <td>{{ usuario.nombre_usuario }}</td>
-        <td>{{ usuario.rol_usuario }}</td>
-        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'usuario_modificar' usuario.id_usuario %}" role="button">
-          <i class="bi bi-pencil-square"></i>
-          Modificar
-        </a></td>
+      <td>{{ usuario.id }}</td>
+      <td>{{ usuario.username }}</td>
+      <td>{{ usuario.rol.nombre_rol }}</td>
+      <td>{{ usuario.is_rol_admin }}</td>
+      <td><a class="btn btn-color btn-m fw-bold" href="{% url 'usuario_modificar' usuario.id %}" role="button">
+        <i class="bi bi-pencil-square"></i>
+        Modificar
+      </a></td>
     </tr>
     {% endfor %}
   </tbody>
