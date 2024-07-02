@@ -39,23 +39,30 @@ class RolForm(forms.ModelForm):
 
 
 class UsuarioForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-
     class Meta:
         model = Usuario
-        fields = ("username", "email", "password1", "password2", "rol")
+        fields = ("username", "password1", "password2", "rol")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["rol"].required = False
+        self.fields["username"].required = True
+        self.fields["password1"].required = True
+        self.fields["password2"].required = True
+        self.fields["rol"].required = True
+
+    def clean_rol(self):
+        rol = self.cleaned_data.get("rol")
+        if not rol:
+            raise forms.ValidationError("Este campo es obligatorio.")
+        return rol
 
 
 class UsuarioForm(UserChangeForm):
     password = forms.CharField(
-        label="Password", required=False, widget=forms.PasswordInput
+        label="Contraseña", required=False, widget=forms.PasswordInput
     )
-    password_confirm = forms.CharField(
-        label="Confirm Password", required=False, widget=forms.PasswordInput
+    confirmar_password = forms.CharField(
+        label="Confirmar contraseña", required=False, widget=forms.PasswordInput
     )
 
     class Meta:
@@ -63,17 +70,17 @@ class UsuarioForm(UserChangeForm):
         fields = (
             "username",
             "password",
-            "password_confirm",
+            "confirmar_password",
             "rol",
         )
 
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
-        password_confirm = cleaned_data.get("password_confirm")
+        confirmar_password = cleaned_data.get("confirmar_password")
 
-        if password and password_confirm:
-            if password != password_confirm:
+        if password and confirmar_password:
+            if password != confirmar_password:
                 raise forms.ValidationError(
                     "Las contraseñas no coinciden. Por favor, inténtelo de nuevo."
                 )

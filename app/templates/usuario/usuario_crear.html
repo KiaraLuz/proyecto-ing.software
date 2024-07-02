@@ -2,8 +2,8 @@
 
 {% block content %}
 <h1>Crear Usuario</h1>
-<div class="form card p-4" method="POST" enctype="multipart/form-data">
-  <form method="POST">
+<div class="form card p-4">
+  <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="mb-3">
       {{ form.as_p }}

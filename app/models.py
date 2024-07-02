@@ -16,7 +16,7 @@ class Rol(models.Model):
 
 class Usuario(AbstractUser):
     id = models.AutoField(primary_key=True)
-    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, null=True, blank=True)
+    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, null=True, blank=False)
 
     def __str__(self):
         return self.username
