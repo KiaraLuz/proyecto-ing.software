@@ -1,81 +1,107 @@
 from django import forms
-from .models import Rol, Usuario,Ingrediente
+from .models import Rol, Usuario, Ingrediente
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
 
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
-        fields = "__all__"
+        exclude = ["id_rol"]
 
-    id = forms.CharField(
-        label="ID", widget=forms.TextInput(attrs={"class": "input"})
-    )
     nombre_rol = forms.CharField(
-        label="Nombre del Rol", widget=forms.TextInput(attrs={"class": "input"})
+        label="Nombre", widget=forms.TextInput(attrs={"class": "input"})
     )
     descripcion = forms.CharField(
         label="Descripción", widget=forms.Textarea(attrs={"class": "input"})
     )
     estado = forms.BooleanField(
-        label="Estado", required=False, widget=forms.CheckboxInput(attrs={"class": "checkbox"})
+        label="Estado",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "checkbox"}),
     )
     is_admin = forms.BooleanField(
-        label="Nivel Administrador", required=False, widget=forms.CheckboxInput(attrs={"class": "checkbox"})
+        label="Nivel Administrador",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "checkbox"}),
     )
 
     def __init__(self, *args, **kwargs):
         super(RolForm, self).__init__(*args, **kwargs)
 
-        if self.instance.pk:
-            self.fields['id'].disabled = True
+    def clean(self):
+        cleaned_data = super().clean()
+        nombre_rol = cleaned_data.get("nombre_rol")
+        descripcion = cleaned_data.get("descripcion")
 
-class UsuarioForm(forms.ModelForm):
+        if not nombre_rol and not descripcion:
+            raise forms.ValidationError("Datos incompletos")
+        return cleaned_data
+
+
+class UsuarioForm(UserCreationForm):
     class Meta:
         model = Usuario
-        fields = "__all__"
-
-    id_usuario = forms.CharField(
-        label="ID", widget=forms.TextInput(attrs={"class": "input"})
-    )
-    nombre_usuario = forms.CharField(
-        label="Nombre", widget=forms.TextInput(attrs={"class": "input"})
-    )
-    rol_usuario = forms.ModelChoiceField(
-        label="Rol",
-        queryset=Rol.objects.all(),
-        widget=forms.Select(attrs={"class": "select"}),
-    )
-    contraseña_usuario = forms.CharField(
-        label="Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "input"}),  
-    )
-    confirmar_contraseña = forms.CharField(
-        label="Confirmar Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "input"})
-    )
+        fields = ("username", "password1", "password2", "rol")
 
     def __init__(self, *args, **kwargs):
-        super(UsuarioForm, self).__init__(*args, **kwargs)
-        if self.instance.pk:
-            self.fields['id_usuario'].disabled = True
+        super().__init__(*args, **kwargs)
+        self.fields["username"].required = True
+        self.fields["password1"].required = True
+        self.fields["password2"].required = True
+        self.fields["rol"].required = True
+
+    def clean_rol(self):
+        rol = self.cleaned_data.get("rol")
+        if not rol:
+            raise forms.ValidationError("Este campo es obligatorio.")
+        return rol
+
+
+class UsuarioForm(UserChangeForm):
+    password = forms.CharField(
+        label="Contraseña", required=False, widget=forms.PasswordInput
+    )
+    confirmar_password = forms.CharField(
+        label="Confirmar contraseña", required=False, widget=forms.PasswordInput
+    )
+
+    class Meta:
+        model = Usuario
+        fields = (
+            "username",
+            "password",
+            "confirmar_password",
+            "rol",
+        )
 
     def clean(self):
         cleaned_data = super().clean()
-        contraseña_usuario = cleaned_data.get("contraseña_usuario")
-        confirmar_contraseña = cleaned_data.get("confirmar_contraseña")
+        password = cleaned_data.get("password")
+        confirmar_password = cleaned_data.get("confirmar_password")
 
-        if contraseña_usuario and confirmar_contraseña and contraseña_usuario != confirmar_contraseña:
-            self.add_error('confirmar_contraseña', "Las contraseñas no coinciden.")
+        if password and confirmar_password:
+            if password != confirmar_password:
+                raise forms.ValidationError(
+                    "Las contraseñas no coinciden. Por favor, inténtelo de nuevo."
+                )
 
         return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data["password"]
+        if password:
+            user.set_password(password)
+            if commit:
+                user.save()
+        return user
+
 
 class IngredienteForm(forms.ModelForm):
     class Meta:
         model = Ingrediente
-        fields = "__all__"
+        exclude = ["id_ingrediente"]
 
-    id_ingrediente = forms.CharField(
-        label="ID del Ingrediente", widget=forms.TextInput(attrs={"class": "input"})
-    )
     nombre_ingrediente = forms.CharField(
         label="Nombre del Ingrediente", widget=forms.TextInput(attrs={"class": "input"})
     )
@@ -83,14 +109,15 @@ class IngredienteForm(forms.ModelForm):
         label="Cantidad", widget=forms.NumberInput(attrs={"class": "input"})
     )
     unidad = forms.ChoiceField(
-        label="Unidad", choices=[("KG", "KG"), ("UNID", "UNID")], widget=forms.Select(attrs={"class": "input"}),
+        label="Unidad",
+        choices=[("KG", "KG"), ("UNID", "UNID")],
+        widget=forms.Select(attrs={"class": "input"}),
     )
     estado_ingrediente = forms.BooleanField(
-        label="Estado del Ingrediente", required=False, widget=forms.CheckboxInput(attrs={"class": "checkbox"})
+        label="Estado del Ingrediente",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "checkbox"}),
     )
 
     def __init__(self, *args, **kwargs):
         super(IngredienteForm, self).__init__(*args, **kwargs)
-
-        if self.instance.pk:
-            self.fields["id_ingrediente"].disabled = True
