@@ -2,8 +2,6 @@ from django.test import TestCase
 from django.urls import reverse
 from .models import Rol, Usuario, Ingrediente
 from .forms import RolForm, UsuarioForm, UsuarioChangeForm, IngredienteForm
-
-
 class RolFormTestCase(TestCase):
     def setUp(self):
         self.rol1 = Rol.objects.create(
@@ -60,6 +58,51 @@ class RolFormTestCase(TestCase):
             "Datos incompletos",
         )
 
+class AuthFormTestCase(TestCase):
+    def setUp(self):
+        self.rol = Rol.objects.create(
+            nombre_rol="Admin",
+            descripcion="Administrador",
+            estado=True,
+            is_admin=True
+        )
+        self.user = Usuario.objects.create_user(
+            username='User_Test',
+            password='Password_Test',
+            rol=self.rol
+        )
+        self.login_url = reverse('signin')
+        self.home_url = reverse('home')
+        self.logout_url = reverse('signout')
+
+    def test_login_page_renders(self):
+        response = self.client.get(self.login_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'signin.html')
+
+    def test_login_success(self):
+        response = self.client.post(self.login_url, {
+            'username': 'User_Test',
+            'password': 'Password_Test',
+        })
+        self.assertRedirects(response, self.home_url)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    def test_login_failure(self):
+        response = self.client.post(self.login_url, {
+            'username': 'User_Test',
+            'password': 'Password_Fail',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'signin.html')
+        self.assertContains(response, 'Username or password is incorrect')
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_logout(self):
+        self.client.login(username='User_Test', password='Password_Test')
+        response = self.client.get(self.logout_url, follow=True)
+        self.assertRedirects(response, self.login_url)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
 
 class UsuarioFormTestCase(TestCase):
     def setUp(self):
