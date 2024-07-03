@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
-from .models import Rol, Ingrediente
-from .forms import RolForm, IngredienteForm
+from .models import Rol, Usuario, Ingrediente
+from .forms import RolForm, UsuarioForm, UsuarioChangeForm, IngredienteForm
 
 
 class RolFormTestCase(TestCase):
@@ -59,6 +59,83 @@ class RolFormTestCase(TestCase):
             form.errors["__all__"][0],
             "Datos incompletos",
         )
+
+
+class UsuarioFormTestCase(TestCase):
+    def setUp(self):
+        self.rol_admin = Rol.objects.create(
+            nombre_rol="Admin",
+            descripcion="Administrador",
+            estado=True,
+            is_admin=True
+        )
+        self.rol_usuario = Rol.objects.create(
+            nombre_rol="Usuario",
+            descripcion="Usuario regular",
+            estado=True,
+            is_admin=False
+        )
+
+    def test_crear_usuario_form(self):
+        form_data = {
+            "username": "testuser",
+            "password1": "testpassword",
+            "password2": "testpassword",
+            "rol": self.rol_usuario.id_rol,
+        }
+        form = UsuarioForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        usuario = form.save(commit=False)
+        usuario.set_password(form.cleaned_data.get("password1"))
+        usuario.save()
+        self.assertEqual(usuario.username, "testuser")
+        self.assertTrue(usuario.check_password("testpassword"))
+        self.assertEqual(usuario.rol, self.rol_usuario)
+
+    def test_modificar_usuario_form(self):
+        usuario = Usuario.objects.create(
+            username="testuser",
+            rol=self.rol_usuario,
+        )
+        usuario.set_password("oldpassword")
+        usuario.save()
+
+        form_data = {
+            "username": "updateduser",
+            "password": "newpassword",
+            "confirmar_password": "newpassword",
+            "rol": self.rol_admin.id_rol,
+        }
+        form = UsuarioChangeForm(data=form_data, instance=usuario)
+        self.assertTrue(form.is_valid())
+        usuario_modificado = form.save()
+        self.assertEqual(usuario_modificado.username, "updateduser")
+        self.assertTrue(usuario_modificado.check_password("newpassword"))
+        self.assertEqual(usuario_modificado.rol, self.rol_admin)
+
+    def test_usuario_form_validations(self):
+        form_data = {
+            "username": "",
+            "password1": "",
+            "password2": "",
+            "rol": None,
+        }
+        form = UsuarioForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("username", form.errors)
+        self.assertIn("password1", form.errors)
+        self.assertIn("password2", form.errors)
+        self.assertIn("rol", form.errors)
+
+        form_data = {
+            "username": "testuser",
+            "password1": "testpassword",
+            "password2": "mismatchpassword",
+            "rol": self.rol_usuario.id_rol,
+        }
+        form = UsuarioForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("password2", form.errors)
 
 
 class IngredienteFormTestCase(TestCase):

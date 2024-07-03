@@ -56,8 +56,7 @@ class UsuarioForm(UserCreationForm):
             raise forms.ValidationError("Este campo es obligatorio.")
         return rol
 
-
-class UsuarioForm(UserChangeForm):
+class UsuarioChangeForm(UserChangeForm):
     password = forms.CharField(
         label="Contraseña", required=False, widget=forms.PasswordInput
     )
