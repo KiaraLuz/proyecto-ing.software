@@ -56,7 +56,7 @@ def rol_crear(request):
     if request.method == "POST":
         form = RolForm(request.POST)
         if form.is_valid():
-            form.save(commit=True)
+            form.save()
             return redirect("roles")
     else:
         form = RolForm()
@@ -71,7 +71,7 @@ def rol_modificar(request, rol_id):
     if request.method == "POST":
         form = RolForm(request.POST, instance=rol)
         if form.is_valid():
-            form.save(commit=True)
+            form.save()
             return redirect("roles")
     else:
         form = RolForm(instance=rol)
@@ -130,7 +130,7 @@ def ingrediente_crear(request):
     if request.method == "POST":
         form = IngredienteForm(request.POST)
         if form.is_valid():
-            form.save(commit=True)
+            form.save()
             return redirect("ingredientes")
     else:
         form = IngredienteForm()
@@ -145,7 +145,7 @@ def ingrediente_modificar(request, ingrediente_id):
     if request.method == "POST":
         form = IngredienteForm(request.POST, instance=ingrediente)
         if form.is_valid():
-            form.save(commit=True)
+            form.save()
             return redirect("ingredientes")
     else:
         form = IngredienteForm(instance=ingrediente)
