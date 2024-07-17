@@ -1,5 +1,5 @@
 from django import forms
-from .models import Rol, Usuario, Ingrediente
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
@@ -107,10 +107,11 @@ class IngredienteForm(forms.ModelForm):
     cantidad = forms.DecimalField(
         label="Cantidad", widget=forms.NumberInput(attrs={"class": "input"})
     )
-    unidad = forms.ChoiceField(
+    unidad = forms.ModelChoiceField(
         label="Unidad",
-        choices=[("KG", "KG"), ("UNID", "UNID")],
+        queryset=UnidadesMedida.objects.all(),
         widget=forms.Select(attrs={"class": "input"}),
+        to_field_name="nombre"
     )
     estado_ingrediente = forms.BooleanField(
         label="Estado del Ingrediente",
