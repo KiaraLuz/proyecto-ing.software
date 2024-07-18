@@ -1,5 +1,6 @@
 from django import forms
-from .models import Rol, Usuario, Ingrediente
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
 class RolForm(forms.ModelForm):
@@ -37,44 +38,62 @@ class RolForm(forms.ModelForm):
         return cleaned_data
 
 
-class UsuarioForm(forms.ModelForm):
+class UsuarioForm(UserCreationForm):
     class Meta:
         model = Usuario
-        exclude = ["id_usuario"]
-
-    nombre_usuario = forms.CharField(
-        label="Nombre", widget=forms.TextInput(attrs={"class": "input"})
-    )
-    rol_usuario = forms.ModelChoiceField(
-        label="Rol",
-        queryset=Rol.objects.all(),
-        widget=forms.Select(attrs={"class": "select"}),
-    )
-    contraseña_usuario = forms.CharField(
-        label="Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "input"}),
-    )
-    confirmar_contraseña = forms.CharField(
-        label="Confirmar Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "input"}),
-    )
+        fields = ("username", "password1", "password2", "rol")
 
     def __init__(self, *args, **kwargs):
-        super(UsuarioForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.fields["username"].required = True
+        self.fields["password1"].required = True
+        self.fields["password2"].required = True
+        self.fields["rol"].required = True
+
+    def clean_rol(self):
+        rol = self.cleaned_data.get("rol")
+        if not rol:
+            raise forms.ValidationError("Este campo es obligatorio.")
+        return rol
+
+class UsuarioChangeForm(UserChangeForm):
+    password = forms.CharField(
+        label="Contraseña", required=False, widget=forms.PasswordInput
+    )
+    confirmar_password = forms.CharField(
+        label="Confirmar contraseña", required=False, widget=forms.PasswordInput
+    )
+
+    class Meta:
+        model = Usuario
+        fields = (
+            "username",
+            "password",
+            "confirmar_password",
+            "rol",
+        )
 
     def clean(self):
         cleaned_data = super().clean()
-        contraseña_usuario = cleaned_data.get("contraseña_usuario")
-        confirmar_contraseña = cleaned_data.get("confirmar_contraseña")
+        password = cleaned_data.get("password")
+        confirmar_password = cleaned_data.get("confirmar_password")
 
-        if (
-            contraseña_usuario
-            and confirmar_contraseña
-            and contraseña_usuario != confirmar_contraseña
-        ):
-            self.add_error("confirmar_contraseña", "Las contraseñas no coinciden.")
+        if password and confirmar_password:
+            if password != confirmar_password:
+                raise forms.ValidationError(
+                    "Las contraseñas no coinciden. Por favor, inténtelo de nuevo."
+                )
 
         return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data["password"]
+        if password:
+            user.set_password(password)
+            if commit:
+                user.save()
+        return user
 
 
 class IngredienteForm(forms.ModelForm):
@@ -88,10 +107,11 @@ class IngredienteForm(forms.ModelForm):
     cantidad = forms.DecimalField(
         label="Cantidad", widget=forms.NumberInput(attrs={"class": "input"})
     )
-    unidad = forms.ChoiceField(
+    unidad = forms.ModelChoiceField(
         label="Unidad",
-        choices=[("KG", "KG"), ("UNID", "UNID")],
+        queryset=UnidadesMedida.objects.all(),
         widget=forms.Select(attrs={"class": "input"}),
+        to_field_name="nombre"
     )
     estado_ingrediente = forms.BooleanField(
         label="Estado del Ingrediente",

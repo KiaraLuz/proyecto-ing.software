@@ -16,7 +16,7 @@
             padding: 0;
         }
         body {
-            background-image: url("{% static 'img/fondo.jpg' %}");
+            background-color: #f8eed4;
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -81,8 +81,8 @@
                         </div>
                         <div>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'logout' %}">
-                                    <img src="{% static 'icons/logout.png' %}" alt="Logout" class="icon-image"> Logout
+                                <a class="nav-link" href="{% url 'signout' %}">
+                                    <img src="{% static 'icons/signout.png' %}" alt="Signout" class="icon-image"> Signout
                                 </a>
                             </li>
                         </div>
