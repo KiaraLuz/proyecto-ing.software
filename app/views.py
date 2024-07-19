@@ -180,9 +180,9 @@ def producto_crear(request):
         
         if form.is_valid() and ingrediente_formset.is_valid():
             producto = form.save()
-            for form in ingrediente_formset:
-                ingrediente = form.cleaned_data.get('ingrediente')
-                cantidad = form.cleaned_data.get('cantidad')
+            for ingrediente_form in ingrediente_formset:
+                ingrediente = ingrediente_form.cleaned_data.get('ingrediente')
+                cantidad = ingrediente_form.cleaned_data.get('cantidad')
                 if ingrediente and cantidad:
                     ProductoIngrediente.objects.create(
                         producto=producto,
@@ -194,9 +194,12 @@ def producto_crear(request):
         form = ProductoForm()
         ingrediente_formset = ProductoIngredienteFormSet(prefix='ingredientes')
 
+    ingredientes = Ingrediente.objects.all()
+
     contexto = {
         "form": form,
-        "ingrediente_formset": ingrediente_formset
+        "ingrediente_formset": ingrediente_formset,
+        "ingredientes": ingredientes 
     }
     return render(request, "producto/producto_crear.html", contexto)
 

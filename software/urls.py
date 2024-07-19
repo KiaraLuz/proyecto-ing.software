@@ -42,4 +42,7 @@ urlpatterns = [
         views.ingrediente_modificar,
         name="ingrediente_modificar",
     ),
+    path("productos/", views.productos, name="productos"),
+    path("productos/crear/", views.producto_crear, name="producto_crear"),
+    path("productos/modificar/<int:producto_id>", views.producto_modificar, name="producto_modificar"),
 ]
