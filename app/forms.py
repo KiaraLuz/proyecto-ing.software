@@ -1,5 +1,6 @@
 from django import forms
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida
+from django.forms import modelformset_factory
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, ProductoIngrediente
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
@@ -121,3 +122,44 @@ class IngredienteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(IngredienteForm, self).__init__(*args, **kwargs)
+
+
+class ProductoForm(forms.ModelForm):
+    class Meta:
+        model = Producto
+        exclude = ["id_producto"]
+
+    nombre_producto = forms.CharField(
+        label="Nombre del Producto", 
+        widget=forms.TextInput(attrs={"class": "input"})
+    )
+    estado_producto = forms.BooleanField(
+        label="Estado del Producto",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "checkbox"}),
+    )
+
+
+class ProductoIngredienteForm(forms.ModelForm):
+    class Meta:
+        model = ProductoIngrediente
+        fields = ['ingrediente', 'cantidad']
+
+    ingrediente = forms.ModelChoiceField(
+        queryset=Ingrediente.objects.all(),
+        widget=forms.Select(attrs={"class": "input"}),
+        required=True,
+        label="Ingrediente"
+    )
+    cantidad = forms.DecimalField(
+        label="Cantidad", 
+        widget=forms.NumberInput(attrs={"class": "input"})
+    )
+
+
+ProductoIngredienteFormSet = modelformset_factory(
+    ProductoIngrediente,
+    form=ProductoIngredienteForm,
+    extra=1,
+    can_delete=True
+)
