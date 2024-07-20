@@ -2,21 +2,24 @@
 
 {% block content %}
   <h1>Crear Producto</h1>
-  <form method="post" id="producto-form">
-    {% csrf_token %}
-    {{ form.as_p }}
-    
-    <h2>Ingredientes</h2>
-    <div id="ingredientes-list">
-        <!-- Aquí se agregarán los ingredientes -->
-    </div>
-    
-    <input type="hidden" id="ingredientes-input" name="ingredientes" value='{{ ingredientes_input_value|safe }}'>
-    
-    <button type="button" id="add-ingrediente">Agregar Ingrediente</button>
-    <button type="submit">Registrar</button>
-    <button type="button" id="cancelar">Cancelar</button>
-  </form>
+  <div class="form card p-4">
+      <form method="post" id="producto-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <h2>Ingredientes</h2>
+        <div id="ingredientes-list">
+        </div>
+        
+        <input type="hidden" id="ingredientes-input" name="ingredientes" value='{{ ingredientes_input_value|safe }}'>
+        <button type="button" id="add-ingrediente" class="btn btn-warning mb-2">Agregar Ingrediente</button>
+
+        <div class="d-flex gap-4">
+            <button type="submit" class="btn btn-color">Registrar</button>
+            <a href="{% url 'productos' %}" class="btn btn-dark">Cancelar</a>
+        </div>
+      </form>
+  </div>
   
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -26,14 +29,14 @@
             const div = document.createElement('div');
             div.classList.add('ingrediente-row');
             div.innerHTML = `
-                <select name="ingredientes[][id]" class="ingrediente-select">
+                <select name="ingredientes[][id]" class="ingrediente-select my-2">
                     <option value="">Seleccione un ingrediente</option>
                     {% for ingrediente in ingredientes %}
                         <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }}</option>
                     {% endfor %}
                 </select>
-                <input type="number" name="ingredientes[][cantidad]" value="${cantidad}" placeholder="Cantidad" step="0.01">
-                <button type="button" class="remove-ingrediente">Eliminar</button>
+                <input type="number" name="ingredientes[][cantidad]" value="${cantidad}" placeholder="Cantidad" min="0" step="1" oninput="this.value = Math.floor(this.value)">
+                <button type="button" class="remove-ingrediente btn btn-danger">Eliminar</button>
             `;
             if (ingredienteId) {
                 div.querySelector('.ingrediente-select').value = ingredienteId;
@@ -62,10 +65,6 @@
                 }
             });
             document.getElementById('ingredientes-input').value = JSON.stringify(ingredientes);
-        });
-
-        document.getElementById('cancelar').addEventListener('click', function() {
-            window.location.href = "{% url 'productos' %}";  // Reemplaza 'productos' con la URL o nombre de la vista a la que deseas redirigir
         });
     });
   </script>
