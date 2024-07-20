@@ -1,127 +1,72 @@
 {% extends 'layouts/base.html' %}
 
 {% block content %}
-<h1>Crear Producto</h1>
-<div class="card p-4">
+  <h1>Crear Producto</h1>
   <form method="post" id="producto-form">
-      {% csrf_token %}
-      
-      <div class="mb-3">
-          {{ form.nombre_producto.label_tag }} 
-          {{ form.nombre_producto }}
-      </div>
-      
-      <div class="mb-3">
-          {{ form.estado_producto.label_tag }} 
-          {{ form.estado_producto }}
-      </div>
-      
-      <div class="mb-3">
-          <label for="ingrediente-select">Ingrediente</label>
-          <select id="ingrediente-select" class="form-select">
-              {% for ingrediente in ingredientes %}
-                  <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }}</option>
-              {% endfor %}
-          </select>
-      </div>
-      
-      <div class="mb-3">
-          <label for="cantidad-input">Cantidad</label>
-          <input type="number" id="cantidad-input" class="form-control" min="0">
-      </div>
-      
-      <button type="button" id="add-ingrediente" class="btn btn-secondary mb-3">Añadir Ingrediente</button>
-      
-      <table class="table table-striped" id="ingredientes-table">
-          <thead>
-              <tr>
-                  <th>Ingrediente</th>
-                  <th>Cantidad</th>
-                  <th>Acciones</th>
-              </tr>
-          </thead>
-          <tbody>
-              
-          </tbody>
-      </table>
-      
-      <input type="hidden" name="ingredientes" id="ingredientes-input">
-      <input type="hidden" name="cantidades" id="cantidades-input">
-      
-      <div class="d-flex gap-4">
-        <button type="submit" class="btn btn-color">Registrar</button>
-        <a href="{% url 'productos' %}" class="btn btn-dark">Cancelar</a>
-      </div>
+    {% csrf_token %}
+    {{ form.as_p }}
+    
+    <h2>Ingredientes</h2>
+    <div id="ingredientes-list">
+        <!-- Aquí se agregarán los ingredientes -->
+    </div>
+    
+    <input type="hidden" id="ingredientes-input" name="ingredientes" value='{{ ingredientes_input_value|safe }}'>
+    
+    <button type="button" id="add-ingrediente">Agregar Ingrediente</button>
+    <button type="submit">Registrar</button>
+    <button type="button" id="cancelar">Cancelar</button>
   </form>
-</div>
-
-<script>
+  
+  <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const addIngredienteButton = document.getElementById('add-ingrediente');
-        const ingredientesTableBody = document.getElementById('ingredientes-table').querySelector('tbody');
-        const ingredienteSelect = document.getElementById('ingrediente-select');
-        const cantidadInput = document.getElementById('cantidad-input');
-        const ingredientesInput = document.getElementById('ingredientes-input');
-        const cantidadesInput = document.getElementById('cantidades-input');
+        const ingredientesList = document.getElementById('ingredientes-list');
 
-        addIngredienteButton.addEventListener('click', function() {
-            const ingredienteId = ingredienteSelect.value;
-            const ingredienteText = ingredienteSelect.options[ingredienteSelect.selectedIndex]?.text || '';
-            const cantidad = parseFloat(cantidadInput.value);
-
-            console.log('Ingrediente ID:', ingredienteId);
-            console.log('Ingrediente Text:', ingredienteText);
-            console.log('Cantidad:', cantidad);
-
-            if (ingredienteId && !isNaN(cantidad) && cantidad > 0) {
-                // Buscar si el ingrediente ya existe en la tabla
-                let row = Array.from(ingredientesTableBody.querySelectorAll('tr'))
-                    .find(row => row.querySelector('input[name="ingredientes"]').value === ingredienteId);
-
-                if (row) {
-                    // Ingrediente ya existe, actualizar la cantidad
-                    const cantidadCell = row.querySelector('td:nth-child(2)');
-                    const existingCantidad = parseFloat(cantidadCell.textContent);
-                    cantidadCell.textContent = existingCantidad + cantidad;
-                } else {
-                    // Ingrediente no existe, añadir una nueva fila
-                    row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${ingredienteText}</td>
-                        <td>${cantidad}</td>
-                        <td><button type="button" class="btn btn-danger btn-sm remove-ingrediente">Eliminar</button></td>
-                        <input type="hidden" name="ingredientes" value="${ingredienteId}">
-                        <input type="hidden" name="cantidades" value="${cantidad}">
-                    `;
-                    ingredientesTableBody.appendChild(row);
-                }
-
-                ingredienteSelect.selectedIndex = 0;
-                cantidadInput.value = '';
-
-                row.querySelector('.remove-ingrediente').addEventListener('click', function() {
-                    row.remove();
-                    updateHiddenInputs();
-                });
-
-                updateHiddenInputs();
-
-                // Mensaje en consola después de añadir o actualizar el ingrediente
-                console.log('Ingrediente añadido o actualizado:', ingredienteText, 'Cantidad:', cantidad);
-            } else {
-                // Mensaje en consola si el ingrediente o cantidad no son válidos
-                console.log('Error: Ingrediente o cantidad no válidos.');
+        function addIngredienteRow(ingredienteId = '', cantidad = '') {
+            const div = document.createElement('div');
+            div.classList.add('ingrediente-row');
+            div.innerHTML = `
+                <select name="ingredientes[][id]" class="ingrediente-select">
+                    <option value="">Seleccione un ingrediente</option>
+                    {% for ingrediente in ingredientes %}
+                        <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="ingredientes[][cantidad]" value="${cantidad}" placeholder="Cantidad" step="0.01">
+                <button type="button" class="remove-ingrediente">Eliminar</button>
+            `;
+            if (ingredienteId) {
+                div.querySelector('.ingrediente-select').value = ingredienteId;
             }
+            ingredientesList.appendChild(div);
+            
+            div.querySelector('.remove-ingrediente').addEventListener('click', function() {
+                div.remove();
+            });
+        }
+
+        document.getElementById('add-ingrediente').addEventListener('click', function() {
+            addIngredienteRow();
         });
 
-        function updateHiddenInputs() {
-            const ids = Array.from(ingredientesTableBody.querySelectorAll('tr input[name="ingredientes"]'))
-                              .map(input => input.value);
-            const cantidades = Array.from(ingredientesTableBody.querySelectorAll('tr input[name="cantidades"]'))
-                                    .map(input => input.value);
-            ingredientesInput.value = ids.join(',');
-            cantidadesInput.value = cantidades.join(',');
-        }
+        document.getElementById('producto-form').addEventListener('submit', function(event) {
+            const ingredientes = [];
+            ingredientesList.querySelectorAll('.ingrediente-row').forEach(function(row) {
+                const ingredienteSelect = row.querySelector('.ingrediente-select');
+                const cantidadInput = row.querySelector('input[name="ingredientes[][cantidad]"]');
+                if (ingredienteSelect.value && cantidadInput.value) {
+                    ingredientes.push({
+                        id: ingredienteSelect.value,
+                        cantidad: cantidadInput.value
+                    });
+                }
+            });
+            document.getElementById('ingredientes-input').value = JSON.stringify(ingredientes);
+        });
+
+        document.getElementById('cancelar').addEventListener('click', function() {
+            window.location.href = "{% url 'productos' %}";  // Reemplaza 'productos' con la URL o nombre de la vista a la que deseas redirigir
+        });
     });
-</script>
+  </script>
 {% endblock %}

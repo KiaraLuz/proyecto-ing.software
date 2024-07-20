@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from app.models import Rol, Usuario, Ingrediente, Producto, ProductoIngrediente
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, ProductoIngredienteFormSet
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.forms import formset_factory
 from .decorators import admin_required
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 
 # Create your views here.
@@ -164,45 +165,71 @@ def productos(request):
 
 @login_required
 @admin_required
-def producto_detalle(request, producto_id):
-    producto = get_object_or_404(Producto, id_producto=producto_id)
-    ingredientes = ProductoIngrediente.objects.filter(producto=producto)
-    contexto = {"producto": producto,"ingredientes": ingredientes}
-    return render(request, "producto/producto_detalle.html", contexto)
-
-
-@login_required
-@admin_required
 def producto_crear(request):
     if request.method == "POST":
         form = ProductoForm(request.POST)
-        ingrediente_formset = ProductoIngredienteFormSet(request.POST, prefix='ingredientes')
+        ingredientes_data = json.loads(request.POST.get('ingredientes', '[]'))
         
-        if form.is_valid() and ingrediente_formset.is_valid():
+        # Validar que la lista de ingredientes no esté vacía
+        if not ingredientes_data:
+            form.add_error(None, "Debes agregar al menos un ingrediente.")
+        
+        if form.is_valid() and ingredientes_data:
             producto = form.save()
-            for ingrediente_form in ingrediente_formset:
-                ingrediente = ingrediente_form.cleaned_data.get('ingrediente')
-                cantidad = ingrediente_form.cleaned_data.get('cantidad')
-                if ingrediente and cantidad:
+            
+            # Mapa para guardar cantidades agregadas por ingrediente
+            ingrediente_cantidades = {}
+            estado_producto = True  # Suponemos que el estado del producto es True inicialmente
+            
+            for ingrediente_data in ingredientes_data:
+                ingrediente_id = ingrediente_data.get('id')
+                cantidad = float(ingrediente_data.get('cantidad'))
+                if ingrediente_id and cantidad:
+                    if ingrediente_id in ingrediente_cantidades:
+                        ingrediente_cantidades[ingrediente_id] += cantidad
+                    else:
+                        ingrediente_cantidades[ingrediente_id] = cantidad
+                    
+                    try:
+                        ingrediente = Ingrediente.objects.get(id_ingrediente=ingrediente_id)
+                        # Verificar el estado del ingrediente
+                        if not ingrediente.estado_ingrediente:
+                            estado_producto = False
+                    except Ingrediente.DoesNotExist:
+                        continue
+            
+            # Crear ingredientes en la base de datos
+            for ingrediente_id, cantidad in ingrediente_cantidades.items():
+                try:
+                    ingrediente = Ingrediente.objects.get(id_ingrediente=ingrediente_id)
                     ProductoIngrediente.objects.create(
                         producto=producto,
                         ingrediente=ingrediente,
                         cantidad=cantidad
                     )
+                except Ingrediente.DoesNotExist:
+                    continue
+
+            # Actualizar el estado del producto basado en los ingredientes
+            producto.estado_producto = estado_producto
+            producto.save()
+            
             return redirect("productos")
+        else:
+            print("Formulario no válido:", form.errors)
+            ingredientes_input_value = json.dumps(ingredientes_data, cls=DjangoJSONEncoder)
     else:
         form = ProductoForm()
-        ingrediente_formset = ProductoIngredienteFormSet(prefix='ingredientes')
-
+        ingredientes_input_value = '[]'  # Valor inicial vacío
+    
     ingredientes = Ingrediente.objects.all()
-
+    
     contexto = {
         "form": form,
-        "ingrediente_formset": ingrediente_formset,
-        "ingredientes": ingredientes 
+        "ingredientes": ingredientes,
+        "ingredientes_input_value": ingredientes_input_value
     }
     return render(request, "producto/producto_crear.html", contexto)
-
 
 @login_required
 @admin_required
@@ -211,32 +238,75 @@ def producto_modificar(request, producto_id):
     
     if request.method == "POST":
         form = ProductoForm(request.POST, instance=producto)
-        ingrediente_formset = ProductoIngredienteFormSet(request.POST, prefix='ingredientes')
+        ingredientes_data = json.loads(request.POST.get('ingredientes', '[]'))
         
-        if form.is_valid() and ingrediente_formset.is_valid():
-            form.save()
+        # Validar que la lista de ingredientes no esté vacía
+        if not ingredientes_data:
+            form.add_error(None, "Debes agregar al menos un ingrediente.")
+        
+        if form.is_valid() and ingredientes_data:
+            producto = form.save()
+            
+            # Mapa para guardar cantidades agregadas por ingrediente
+            ingrediente_cantidades = {}
+            estado_producto = True  # Suponemos que el estado del producto es True inicialmente
+            
+            for ingrediente_data in ingredientes_data:
+                ingrediente_id = ingrediente_data.get('id')
+                cantidad = float(ingrediente_data.get('cantidad'))
+                if ingrediente_id and cantidad:
+                    if ingrediente_id in ingrediente_cantidades:
+                        ingrediente_cantidades[ingrediente_id] += cantidad
+                    else:
+                        ingrediente_cantidades[ingrediente_id] = cantidad
+                    
+                    try:
+                        ingrediente = Ingrediente.objects.get(id_ingrediente=ingrediente_id)
+                        # Verificar el estado del ingrediente
+                        if not ingrediente.estado_ingrediente:
+                            estado_producto = False
+                    except Ingrediente.DoesNotExist:
+                        continue
+            
+            # Eliminar ingredientes antiguos y agregar los nuevos
             ProductoIngrediente.objects.filter(producto=producto).delete()
-            for form in ingrediente_formset:
-                ingrediente = form.cleaned_data.get('ingrediente')
-                cantidad = form.cleaned_data.get('cantidad')
-                if ingrediente and cantidad:
+            
+            for ingrediente_id, cantidad in ingrediente_cantidades.items():
+                try:
+                    ingrediente = Ingrediente.objects.get(id_ingrediente=ingrediente_id)
                     ProductoIngrediente.objects.create(
                         producto=producto,
                         ingrediente=ingrediente,
                         cantidad=cantidad
                     )
+                except Ingrediente.DoesNotExist:
+                    continue
+
+            # Actualizar el estado del producto basado en los ingredientes
+            producto.estado_producto = estado_producto
+            producto.save()
+            
             return redirect("productos")
+        else:
+            print("Formulario no válido:", form.errors)
+            ingredientes_input_value = json.dumps(ingredientes_data, cls=DjangoJSONEncoder)
     else:
         form = ProductoForm(instance=producto)
-        ingredientes_iniciales = ProductoIngrediente.objects.filter(producto=producto)
-        initial_data = [{'ingrediente': ing.ingrediente, 'cantidad': ing.cantidad} for ing in ingredientes_iniciales]
-        ingrediente_formset = ProductoIngredienteFormSet(
-            initial=initial_data,
-            prefix='ingredientes'
-        )
-
+        producto_ingredientes = ProductoIngrediente.objects.filter(producto=producto)
+        ingredientes_data = [
+            {
+                "id": pi.ingrediente.id_ingrediente,
+                "cantidad": pi.cantidad
+            }
+            for pi in producto_ingredientes
+        ]
+        ingredientes_input_value = json.dumps(ingredientes_data, cls=DjangoJSONEncoder)
+    
+    ingredientes = Ingrediente.objects.all()
+    
     contexto = {
         "form": form,
-        "ingrediente_formset": ingrediente_formset
+        "ingredientes": ingredientes,
+        "ingredientes_input_value": ingredientes_input_value
     }
     return render(request, "producto/producto_modificar.html", contexto)
