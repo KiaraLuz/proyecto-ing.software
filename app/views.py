@@ -169,17 +169,15 @@ def producto_crear(request):
     if request.method == "POST":
         form = ProductoForm(request.POST)
         ingredientes_data = json.loads(request.POST.get('ingredientes', '[]'))
-        
-        # Validar que la lista de ingredientes no esté vacía
+
         if not ingredientes_data:
             form.add_error(None, "Debes agregar al menos un ingrediente.")
         
         if form.is_valid() and ingredientes_data:
             producto = form.save()
             
-            # Mapa para guardar cantidades agregadas por ingrediente
             ingrediente_cantidades = {}
-            estado_producto = True  # Suponemos que el estado del producto es True inicialmente
+            estado_producto = True 
             
             for ingrediente_data in ingredientes_data:
                 ingrediente_id = ingrediente_data.get('id')
@@ -192,13 +190,11 @@ def producto_crear(request):
                     
                     try:
                         ingrediente = Ingrediente.objects.get(id_ingrediente=ingrediente_id)
-                        # Verificar el estado del ingrediente
                         if not ingrediente.estado_ingrediente:
                             estado_producto = False
                     except Ingrediente.DoesNotExist:
                         continue
             
-            # Crear ingredientes en la base de datos
             for ingrediente_id, cantidad in ingrediente_cantidades.items():
                 try:
                     ingrediente = Ingrediente.objects.get(id_ingrediente=ingrediente_id)
@@ -210,7 +206,6 @@ def producto_crear(request):
                 except Ingrediente.DoesNotExist:
                     continue
 
-            # Actualizar el estado del producto basado en los ingredientes
             producto.estado_producto = estado_producto
             producto.save()
             
@@ -220,7 +215,7 @@ def producto_crear(request):
             ingredientes_input_value = json.dumps(ingredientes_data, cls=DjangoJSONEncoder)
     else:
         form = ProductoForm()
-        ingredientes_input_value = '[]'  # Valor inicial vacío
+        ingredientes_input_value = '[]' 
     
     ingredientes = Ingrediente.objects.all()
     
@@ -240,16 +235,14 @@ def producto_modificar(request, producto_id):
         form = ProductoForm(request.POST, instance=producto)
         ingredientes_data = json.loads(request.POST.get('ingredientes', '[]'))
         
-        # Validar que la lista de ingredientes no esté vacía
         if not ingredientes_data:
             form.add_error(None, "Debes agregar al menos un ingrediente.")
         
         if form.is_valid() and ingredientes_data:
             producto = form.save()
             
-            # Mapa para guardar cantidades agregadas por ingrediente
             ingrediente_cantidades = {}
-            estado_producto = True  # Suponemos que el estado del producto es True inicialmente
+            estado_producto = True 
             
             for ingrediente_data in ingredientes_data:
                 ingrediente_id = ingrediente_data.get('id')
@@ -262,13 +255,11 @@ def producto_modificar(request, producto_id):
                     
                     try:
                         ingrediente = Ingrediente.objects.get(id_ingrediente=ingrediente_id)
-                        # Verificar el estado del ingrediente
                         if not ingrediente.estado_ingrediente:
                             estado_producto = False
                     except Ingrediente.DoesNotExist:
                         continue
             
-            # Eliminar ingredientes antiguos y agregar los nuevos
             ProductoIngrediente.objects.filter(producto=producto).delete()
             
             for ingrediente_id, cantidad in ingrediente_cantidades.items():
@@ -281,8 +272,6 @@ def producto_modificar(request, producto_id):
                     )
                 except Ingrediente.DoesNotExist:
                     continue
-
-            # Actualizar el estado del producto basado en los ingredientes
             producto.estado_producto = estado_producto
             producto.save()
             
