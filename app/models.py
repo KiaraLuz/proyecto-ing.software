@@ -36,6 +36,7 @@ class Ingrediente(models.Model):
     def __str__(self):
         return self.nombre_ingrediente
 
+
 class UnidadesMedida(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
@@ -50,19 +51,18 @@ class Producto(models.Model):
     ingredientes = models.ManyToManyField('Ingrediente', through='ProductoIngrediente')
     estado_producto = models.BooleanField(default=True)
 
+    def actualizar_estado(self):
+        if self.ingredientes.filter(estado_ingrediente=False).exists():
+            self.estado_producto = False
+        else:
+            self.estado_producto = True
+        self.save()
+
     def __str__(self):
         return self.nombre_producto
-
-    def save(self, *args, **kwargs):
-        if self.pk:
-            self.estado_producto = all(ing.estado_ingrediente for ing in self.ingredientes.all())
-        super().save(*args, **kwargs)
 
 
 class ProductoIngrediente(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        return f"{self.ingrediente.nombre_ingrediente} - {self.cantidad} {self.ingrediente.unidad}"
