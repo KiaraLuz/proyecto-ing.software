@@ -30,16 +30,11 @@ urlpatterns = [
     path("signin/", views.signin, name="signin"),
     path("usuarios/", views.usuarios, name="usuarios"),
     path("usuarios/crear/", views.usuario_crear, name="usuario_crear"),
-    path(
-        "usuarios/modificar/<int:usuario_id>/",
-        views.usuario_modificar,
-        name="usuario_modificar",
-    ),
+    path("usuarios/modificar/<int:usuario_id>/", views.usuario_modificar, name="usuario_modificar"),
     path("ingredientes/", views.ingredientes, name="ingredientes"),
     path("ingredientes/crear/", views.ingrediente_crear, name="ingrediente_crear"),
-    path(
-        "ingredientes/modificar/<int:ingrediente_id>",
-        views.ingrediente_modificar,
-        name="ingrediente_modificar",
-    ),
+    path("ingredientes/modificar/<int:ingrediente_id>", views.ingrediente_modificar, name="ingrediente_modificar"),
+    path("productos/", views.productos, name="productos"),
+    path("productos/crear/", views.producto_crear, name="producto_crear"),
+    path("productos/modificar/<int:producto_id>", views.producto_modificar, name="producto_modificar"),
 ]
