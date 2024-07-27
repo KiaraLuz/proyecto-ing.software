@@ -37,7 +37,6 @@ class RolForm(forms.ModelForm):
             raise forms.ValidationError("Datos incompletos")
         return cleaned_data
 
-
 class UsuarioForm(UserCreationForm):
     class Meta:
         model = Usuario
@@ -95,7 +94,6 @@ class UsuarioChangeForm(UserChangeForm):
                 user.save()
         return user
 
-
 class IngredienteForm(forms.ModelForm):
     class Meta:
         model = Ingrediente
@@ -122,18 +120,15 @@ class IngredienteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(IngredienteForm, self).__init__(*args, **kwargs)
 
-
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
         fields = ['nombre_producto']
 
-
 class ProductoIngredienteForm(forms.ModelForm):
     class Meta:
         model = ProductoIngrediente
         fields = ['ingrediente', 'cantidad']
-
 
 class PrecioProductoForm(forms.ModelForm):
     class Meta:
@@ -154,7 +149,6 @@ class PrecioProductoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PrecioProductoForm, self).__init__(*args, **kwargs)
-
 
 class PrecioIngredienteForm(forms.ModelForm):
     class Meta:

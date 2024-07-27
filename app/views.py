@@ -14,7 +14,6 @@ import json
 def home(request):
     return render(request, "home.html")
 
-
 def signin(request):
     if request.method == "GET":
         return render(request, "signin.html", {"form": AuthenticationForm})
@@ -37,12 +36,10 @@ def signin(request):
             login(request, user)
             return redirect("home")
 
-
 @login_required
 def signout(request):
     logout(request)
     return redirect("signin")
-
 
 @login_required
 @admin_required
@@ -50,7 +47,6 @@ def roles(request):
     roles = Rol.objects.all()
     contexto = {"roles": roles}
     return render(request, "rol/rol.html", contexto)
-
 
 @login_required
 @admin_required
@@ -64,7 +60,6 @@ def rol_crear(request):
         form = RolForm()
     contexto = {"form": form}
     return render(request, "rol/rol_crear.html", contexto)
-
 
 @login_required
 @admin_required
@@ -80,14 +75,12 @@ def rol_modificar(request, rol_id):
     contexto = {"form": form}
     return render(request, "rol/rol_modificar.html", contexto)
 
-
 @login_required
 @admin_required
 def usuarios(request):
     usuarios = Usuario.objects.all()
     contexto = {"usuarios": usuarios}
     return render(request, "usuario/usuario.html", contexto)
-
 
 @login_required
 @admin_required
@@ -101,7 +94,6 @@ def usuario_crear(request):
         form = UsuarioForm()
     contexto = {"form": form}
     return render(request, "usuario/usuario_crear.html", contexto)
-
 
 @login_required
 @admin_required
@@ -313,6 +305,7 @@ def precio_producto_crear(request):
         form = PrecioProductoForm()
     contexto = {"form": form}
     return render(request, "precio_producto/precio_producto_crear.html", contexto)
+
 @login_required
 @admin_required
 def precio_producto_modificar(request, precio_producto_id):
@@ -326,10 +319,15 @@ def precio_producto_modificar(request, precio_producto_id):
         form = PrecioProductoForm(instance=precio_producto)
     contexto = {"form": form}
     return render(request, "precio_producto/precio_producto_modificar.html", contexto)
+
+@login_required
+@admin_required
 def precio_ingrediente_listar(request):
     precios = PrecioIngrediente.objects.all()
     return render(request, 'precio_ingrediente/precio_ingrediente_listar.html', {'precios': precios})
 
+@login_required
+@admin_required
 def precio_ingrediente_crear(request):
     if request.method == 'POST':
         form = PrecioIngredienteForm(request.POST)
@@ -340,6 +338,8 @@ def precio_ingrediente_crear(request):
         form = PrecioIngredienteForm()
     return render(request, 'precio_ingrediente/precio_ingrediente_crear.html', {'form': form})
 
+@login_required
+@admin_required
 def precio_ingrediente_modificar(request, precio_ingrediente_id):
     precio_ingrediente = get_object_or_404(PrecioIngrediente, id=precio_ingrediente_id)
     if request.method == 'POST':
