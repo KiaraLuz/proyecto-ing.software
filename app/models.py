@@ -66,3 +66,18 @@ class ProductoIngrediente(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    
+class PrecioProducto(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE,default=1)
+    precio_producto = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.producto.nombre_producto} - {self.precio_producto}"
+
+class PrecioIngrediente(models.Model):
+    ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
+    precio_ingrediente = models.DecimalField(max_digits=10, decimal_places=2)
+    unidad = models.ForeignKey(UnidadesMedida, on_delete=models.CASCADE,default=1)  
+
+    def __str__(self):
+        return f"{self.ingrediente.nombre_ingrediente} - {self.precio_ingrediente} ({self.unidad.nombre})"

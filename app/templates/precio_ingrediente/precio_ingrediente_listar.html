@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Listado de Precios de Ingredientes</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'precio_ingrediente_crear' %}" role="button">Crear Precio Ingrediente</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+    <tr>
+      <td scope="col">Id</td>
+      <td scope="col">Ingrediente</td>
+      <td scope="col">Precio por unidad (S/.)</td>
+      <td scope="col">Unidad</td>
+      <th colspan="2">Opciones</th>
+    </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    {% for precio in precios %}
+    <tr>
+        <td>{{ precio.id }}</td>
+        <td>{{ precio.ingrediente.nombre_ingrediente }}</td>
+        <td>{{ precio.precio_ingrediente }}</td>
+        <td>{{ precio.unidad.nombre }}</td>
+        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'precio_ingrediente_modificar' precio.id %}" role="button">
+          <i class="bi bi-pencil-square"></i>
+          Modificar
+        </a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

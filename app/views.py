@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import Rol, Usuario, Ingrediente, Producto, ProductoIngrediente
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm
+from app.models import Rol, Usuario, Ingrediente, Producto, ProductoIngrediente,PrecioProducto,PrecioIngrediente
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm,PrecioProductoForm,PrecioIngredienteForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -117,14 +117,12 @@ def usuario_modificar(request, usuario_id):
     contexto = {"form": form}
     return render(request, "usuario/usuario_modificar.html", contexto)
 
-
 @login_required
 @admin_required
 def ingredientes(request):
     ingredientes = Ingrediente.objects.all()
     contexto = {"ingredientes": ingredientes}
     return render(request, "ingrediente/ingrediente.html", contexto)
-
 
 @login_required
 @admin_required
@@ -138,7 +136,6 @@ def ingrediente_crear(request):
         form = IngredienteForm()
     contexto = {"form": form}
     return render(request, "ingrediente/ingrediente_crear.html", contexto)
-
 
 @login_required
 @admin_required
@@ -154,14 +151,12 @@ def ingrediente_modificar(request, ingrediente_id):
     contexto = {"form": form}
     return render(request, "ingrediente/ingrediente_modificar.html", contexto)
 
-
 @login_required
 @admin_required
 def productos(request):
     productos = Producto.objects.all()
     contexto = {"productos": productos}
     return render(request, "producto/producto.html", contexto)
-
 
 @login_required
 @admin_required
@@ -299,3 +294,59 @@ def producto_modificar(request, producto_id):
         "ingredientes_input_value": ingredientes_input_value
     }
     return render(request, "producto/producto_modificar.html", contexto)
+
+@login_required
+@admin_required
+def precio_producto_listar(request):
+    precios = PrecioProducto.objects.all()
+    return render(request, 'precio_producto/precio_producto_listar.html', {'precios': precios})
+
+@login_required
+@admin_required
+def precio_producto_crear(request):
+    if request.method == "POST":
+        form = PrecioProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('precio_producto_listar')  # Asegúrate de que este nombre es correcto
+    else:
+        form = PrecioProductoForm()
+    contexto = {"form": form}
+    return render(request, "precio_producto/precio_producto_crear.html", contexto)
+@login_required
+@admin_required
+def precio_producto_modificar(request, precio_producto_id):
+    precio_producto = get_object_or_404(PrecioProducto, id=precio_producto_id)
+    if request.method == "POST":
+        form = PrecioProductoForm(request.POST, instance=precio_producto)
+        if form.is_valid():
+            form.save()
+            return redirect("precio_producto_listar")
+    else:
+        form = PrecioProductoForm(instance=precio_producto)
+    contexto = {"form": form}
+    return render(request, "precio_producto/precio_producto_modificar.html", contexto)
+def precio_ingrediente_listar(request):
+    precios = PrecioIngrediente.objects.all()
+    return render(request, 'precio_ingrediente/precio_ingrediente_listar.html', {'precios': precios})
+
+def precio_ingrediente_crear(request):
+    if request.method == 'POST':
+        form = PrecioIngredienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('precio_ingrediente_listar')
+    else:
+        form = PrecioIngredienteForm()
+    return render(request, 'precio_ingrediente/precio_ingrediente_crear.html', {'form': form})
+
+def precio_ingrediente_modificar(request, precio_ingrediente_id):
+    precio_ingrediente = get_object_or_404(PrecioIngrediente, id=precio_ingrediente_id)
+    if request.method == 'POST':
+        form = PrecioIngredienteForm(request.POST, instance=precio_ingrediente)
+        if form.is_valid():
+            form.save()
+            return redirect('precio_ingrediente_listar')
+    else:
+        form = PrecioIngredienteForm(instance=precio_ingrediente)
+    return render(request, 'precio_ingrediente/precio_ingrediente_modificar.html', {'form': form, 'precio_ingrediente': precio_ingrediente})

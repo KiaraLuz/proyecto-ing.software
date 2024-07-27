@@ -1,8 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, ProductoIngrediente
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, ProductoIngrediente, PrecioProducto,PrecioIngrediente
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-
 
 class RolForm(forms.ModelForm):
     class Meta:
@@ -134,3 +133,42 @@ class ProductoIngredienteForm(forms.ModelForm):
     class Meta:
         model = ProductoIngrediente
         fields = ['ingrediente', 'cantidad']
+
+
+class PrecioProductoForm(forms.ModelForm):
+    class Meta:
+        model = PrecioProducto
+        fields = ['producto', 'precio_producto']
+
+    producto = forms.ModelChoiceField(
+        label="Producto",
+        queryset=Producto.objects.all(),
+        widget=forms.Select(attrs={"class": "input"})
+    )
+    precio_producto = forms.DecimalField(
+        label="Precio",
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={"class": "input"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(PrecioProductoForm, self).__init__(*args, **kwargs)
+
+
+class PrecioIngredienteForm(forms.ModelForm):
+    class Meta:
+        model = PrecioIngrediente
+        fields = ['ingrediente', 'precio_ingrediente','unidad']
+
+    ingrediente = forms.ModelChoiceField(
+        label="Ingrediente",
+        queryset=Ingrediente.objects.all(),
+        widget=forms.Select(attrs={"class": "input"})
+    )
+    precio_ingrediente = forms.DecimalField(
+        label="Precio",
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={"class": "input"})
+    )
