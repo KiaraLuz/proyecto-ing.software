@@ -7,74 +7,10 @@
         {% csrf_token %}
         {{ form.as_p }}
         
-        <h2>Ingredientes</h2>
-        <div id="ingredientes-list">
-        </div>
-        
-        <input type="hidden" id="ingredientes-input" name="ingredientes" value='{{ ingredientes_input_value|safe }}'>
-        
-        <button type="button" id="add-ingrediente" class="btn btn-warning mb-2">Agregar Ingrediente</button>
         <div class="d-flex gap-4">
-            <button type="submit" class="btn btn-color">Registrar</button>
+            <button type="submit" class="btn btn-color">Actualizar</button>
             <a href="{% url 'productos' %}" class="btn btn-dark">Cancelar</a>
         </div>
       </form>
   </div>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ingredientesData = JSON.parse(document.getElementById('ingredientes-input').value);
-        const ingredientesList = document.getElementById('ingredientes-list');
-
-        function addIngredienteRow(ingredienteId = '', cantidad = '') {
-            const div = document.createElement('div');
-            div.classList.add('ingrediente-row');
-            div.innerHTML = `
-                <select name="ingredientes[][id]" class="ingrediente-select my-2">
-                    <option value="">Seleccione un ingrediente</option>
-                    {% for ingrediente in ingredientes %}
-                        <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }}</option>
-                    {% endfor %}
-                </select>
-                <input type="number" name="ingredientes[][cantidad]" value="${parseInt(cantidad) || ''}" placeholder="Cantidad" min="0" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                <button type="button" class="remove-ingrediente btn btn-danger">Eliminar</button>
-            `;
-            if (ingredienteId) {
-                div.querySelector('.ingrediente-select').value = ingredienteId;
-            }
-            ingredientesList.appendChild(div);
-            
-            div.querySelector('.remove-ingrediente').addEventListener('click', function() {
-                div.remove();
-            });
-        }
-
-        ingredientesData.forEach(item => {
-            addIngredienteRow(item.id, parseInt(item.cantidad));
-        });
-
-        document.getElementById('add-ingrediente').addEventListener('click', function() {
-            addIngredienteRow();
-        });
-
-        document.getElementById('producto-form').addEventListener('submit', function(event) {
-            const ingredientes = [];
-            ingredientesList.querySelectorAll('.ingrediente-row').forEach(function(row) {
-                const ingredienteSelect = row.querySelector('.ingrediente-select');
-                const cantidadInput = row.querySelector('input[name="ingredientes[][cantidad]"]');
-                if (ingredienteSelect.value && cantidadInput.value) {
-                    ingredientes.push({
-                        id: ingredienteSelect.value,
-                        cantidad: cantidadInput.value
-                    });
-                }
-            });
-            document.getElementById('ingredientes-input').value = JSON.stringify(ingredientes);
-        });
-
-        document.getElementById('cancelar').addEventListener('click', function() {
-            window.location.href = "{% url 'productos' %}";
-        });
-    });
-  </script>
 {% endblock %}

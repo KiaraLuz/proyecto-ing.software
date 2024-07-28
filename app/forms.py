@@ -1,7 +1,9 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, ProductoIngrediente, PrecioProducto,PrecioIngrediente
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, PrecioProducto,PrecioIngrediente,RecetaIngrediente,Receta
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
+
 
 class RolForm(forms.ModelForm):
     class Meta:
@@ -123,13 +125,52 @@ class IngredienteForm(forms.ModelForm):
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
-        fields = ['nombre_producto']
+        #fields = ['nombre_producto', 'descripcion', 'estado_producto']
+        fields = ['nombre_producto', 'descripcion']
+        labels = {
+            'nombre_producto': 'Nombre del Producto',
+            'descripcion': 'Descripción',
+            #'estado_producto': 'Activo'
+        }
+        widgets = {
+            'nombre_producto': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            #'estado_producto': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+class RecetaIngredienteForm(forms.ModelForm):
+    class Meta:
+        model = RecetaIngrediente
+        fields = ['ingrediente', 'cantidad', 'unidad']
+        widgets = {
+            'ingrediente': forms.Select(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'unidad': forms.Select(attrs={'class': 'form-control'}),
+        }
 
+# Formulario para la receta
+class RecetaForm(forms.ModelForm):
+    class Meta:
+        model = Receta
+        fields = ['producto']
+        widgets = {
+            'producto': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+# Formset para ingredientes de la receta
+RecetaIngredienteFormSet = inlineformset_factory(
+    Receta,
+    RecetaIngrediente,
+    form=RecetaIngredienteForm,
+    fields=['ingrediente', 'cantidad', 'unidad'], 
+    #extra=0,# Inicia con un formulario vacío
+    can_delete=True
+)
+'''
 class ProductoIngredienteForm(forms.ModelForm):
     class Meta:
         model = ProductoIngrediente
         fields = ['ingrediente', 'cantidad']
-
+'''
 class PrecioProductoForm(forms.ModelForm):
     class Meta:
         model = PrecioProducto

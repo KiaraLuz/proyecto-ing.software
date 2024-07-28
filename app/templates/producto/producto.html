@@ -9,7 +9,7 @@
     <tr>
       <td scope="col">Id</td>
       <td scope="col">Nombre</td>
-      <td scope="col">Estado</td>
+      <td scope="col">Descripción</td>  <!-- Agregar columna de descripción -->
       <th colspan="2">Opciones</th>
     </tr>
   </thead>
@@ -18,8 +18,7 @@
     <tr>
         <td>{{ producto.id_producto }}</td>
         <td>{{ producto.nombre_producto }}</td>
-        <td>{{ producto.estado_producto }}</td>
-
+        <td>{{ producto.descripcion }}</td>  <!-- Mostrar descripción -->
         <td><a class="btn btn-color btn-m fw-bold" href="{% url 'producto_modificar' producto.id_producto %}" role="button">
           <i class="bi bi-pencil-square"></i>
           Modificar

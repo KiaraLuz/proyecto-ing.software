@@ -1,0 +1,73 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Modificar Receta</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ receta_form.as_p }}
+  <div id="ingrediente-formset">
+    {{ ingrediente_formset.management_form }}
+    {% for form in ingrediente_formset %}
+      <div class="ingrediente-form">
+        {{ form.as_p }}
+        {% if ingrediente_formset.can_delete %}
+          <button type="button" class="delete-ingredient">Eliminar</button>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  <button type="button" id="add-ingredient">Añadir Ingrediente</button>
+  <button type="submit">Guardar</button>
+</form>
+
+<script>
+ document.addEventListener("DOMContentLoaded", function() {
+    var formCount = parseInt("{{ ingrediente_formset.total_form_count }}");
+    var container = document.getElementById("ingrediente-formset");
+    var addButton = document.getElementById("add-ingredient");
+
+    addButton.onclick = function() {
+        // Clonar el último formulario de ingrediente
+        var newForm = container.children[container.children.length - 1].cloneNode(true);
+        var formRegex = new RegExp(`form-(\\d){1}-`, 'g');
+
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formCount}-`);
+        newForm.className = "ingrediente-form";
+
+        // Actualizar los atributos id y name de los campos en el nuevo formulario
+        var inputs = newForm.querySelectorAll('input, select');
+        inputs.forEach(function(input) {
+            if (input.id) input.id = input.id.replace(/form-\d-/g, 'form-' + formCount + '-');
+            if (input.name) input.name = input.name.replace(/form-\d-/g, 'form-' + formCount + '-');
+            input.value = ''; // Limpiar el valor del campo
+        });
+
+        container.appendChild(newForm);
+        formCount++;
+        document.getElementById("id_ingrediente-TOTAL_FORMS").value = formCount;
+
+        // Añadir botón de eliminar si no existe
+        var deleteButton = newForm.querySelector(".delete-ingredient");
+        if (!deleteButton) {
+            deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "delete-ingredient";
+            deleteButton.innerText = "Eliminar";
+            newForm.appendChild(deleteButton);
+        }
+    };
+
+    container.addEventListener("click", function(e) {
+        if (e.target.classList.contains("delete-ingredient")) {
+            e.preventDefault();
+            e.target.closest(".ingrediente-form").remove();
+            formCount--;
+            document.getElementById("id_ingrediente-TOTAL_FORMS").value = formCount;
+        }
+    });
+});
+
+  </script>
+  
+
+{% endblock %}
