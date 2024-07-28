@@ -43,4 +43,7 @@ urlpatterns = [
     path('preciosingredientes/', views.precio_ingrediente_listar, name='precio_ingrediente_listar'),
     path('preciosingredientes/crear/', views.precio_ingrediente_crear, name='precio_ingrediente_crear'),
     path('preciosingredientes/modificar/<int:precio_ingrediente_id>/', views.precio_ingrediente_modificar, name='precio_ingrediente_modificar'),
+    path('recetas/', views.receta_listar, name='receta_listar'),
+    path('recetas/crear/', views.receta_crear, name='receta_crear'),
+    path('recetas/modificar/<int:receta_id>/', views.receta_modificar, name='receta_modificar'),
 ]

@@ -44,29 +44,41 @@ class UnidadesMedida(models.Model):
     def __str__(self):
         return self.nombre
 
+from django.db import models
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
     nombre_producto = models.CharField(max_length=100)
-    ingredientes = models.ManyToManyField('Ingrediente', through='ProductoIngrediente')
-    estado_producto = models.BooleanField(default=True)
+    descripcion = models.TextField(blank=True, null=True)
 
-    def actualizar_estado(self):
-        if self.ingredientes.filter(estado_ingrediente=False).exists():
-            self.estado_producto = False
-        else:
-            self.estado_producto = True
-        self.save()
+    #ingredientes = models.ManyToManyField('Ingrediente', through='ProductoIngrediente')
+   # estado_producto = models.BooleanField(default=True)
+
+   # def actualizar_estado(self):
+       # if self.ingredientes.filter(estado_ingrediente=False).exists():
+           # self.estado_producto = False
+        #else:
+           # self.estado_producto = True
+        #self.save()
 
     def __str__(self):
         return self.nombre_producto
 
+class Receta(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    ingredientes = models.ManyToManyField(Ingrediente, through='RecetaIngrediente')
 
+class RecetaIngrediente(models.Model):
+    receta = models.ForeignKey(Receta, on_delete=models.CASCADE)
+    ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    unidad = models.ForeignKey(UnidadesMedida, on_delete=models.CASCADE)
+'''
 class ProductoIngrediente(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
-    
+'''   
 class PrecioProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE,default=1)
     precio_producto = models.DecimalField(max_digits=10, decimal_places=2)
@@ -81,3 +93,4 @@ class PrecioIngrediente(models.Model):
 
     def __str__(self):
         return f"{self.ingrediente.nombre_ingrediente} - {self.precio_ingrediente} ({self.unidad.nombre})"
+    
