@@ -5,29 +5,31 @@
     <title>Signin</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="shortcut icon" href="{% static 'img/logo.jpg' %}" type="image/x-icon">
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-image: url("{% static 'img/fondo.jpg' %}");
+            background-color: #f8eed4;
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;
         } 
-        .btn {
+        .btn-signin {
             background-color: #ea9d44;
             color: #000; 
             display: flex;
             justify-content: center;
             align-items: center;
             border: 0px;
+
         }
         .btn:hover {
             background-color: #86541b;
+            color: #fff;
         }
     </style>
 </head>
@@ -54,7 +56,7 @@
                         <input type="password" name="password" id="password" class="form-control" placeholder="Escribe tu contraseña" required>
                     </div>
                     
-                    <button class="btn btn-dark">
+                    <button class="btn btn-signin">
                         Signin
                     </button>
                 </form>

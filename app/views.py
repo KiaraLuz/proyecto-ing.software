@@ -194,9 +194,9 @@ def producto_modificar(request, producto_id):
 
 @login_required
 @admin_required
-def precio_producto_listar(request):
+def precio_productos(request):
     precios = PrecioProducto.objects.all()
-    return render(request, 'precio_producto/precio_producto_listar.html', {'precios': precios})
+    return render(request, 'precio_producto/precio_productos.html', {'precios': precios})
 
 @login_required
 @admin_required
@@ -205,7 +205,7 @@ def precio_producto_crear(request):
         form = PrecioProductoForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('precio_producto_listar')  # Asegúrate de que este nombre es correcto
+            return redirect('precio_productos')  # Asegúrate de que este nombre es correcto
     else:
         form = PrecioProductoForm()
     contexto = {"form": form}
@@ -219,7 +219,7 @@ def precio_producto_modificar(request, precio_producto_id):
         form = PrecioProductoForm(request.POST, instance=precio_producto)
         if form.is_valid():
             form.save()
-            return redirect("precio_producto_listar")
+            return redirect("precio_productos")
     else:
         form = PrecioProductoForm(instance=precio_producto)
     contexto = {"form": form}
@@ -227,9 +227,9 @@ def precio_producto_modificar(request, precio_producto_id):
 
 @login_required
 @admin_required
-def precio_ingrediente_listar(request):
+def precio_ingredientes(request):
     precios = PrecioIngrediente.objects.all()
-    return render(request, 'precio_ingrediente/precio_ingrediente_listar.html', {'precios': precios})
+    return render(request, 'precio_ingrediente/precio_ingredientes.html', {'precios': precios})
 
 @login_required
 @admin_required
@@ -238,7 +238,7 @@ def precio_ingrediente_crear(request):
         form = PrecioIngredienteForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('precio_ingrediente_listar')
+            return redirect('precio_ingredientes')
     else:
         form = PrecioIngredienteForm()
     return render(request, 'precio_ingrediente/precio_ingrediente_crear.html', {'form': form})
@@ -251,14 +251,14 @@ def precio_ingrediente_modificar(request, precio_ingrediente_id):
         form = PrecioIngredienteForm(request.POST, instance=precio_ingrediente)
         if form.is_valid():
             form.save()
-            return redirect('precio_ingrediente_listar')
+            return redirect('precio_ingredientes')
     else:
         form = PrecioIngredienteForm(instance=precio_ingrediente)
     return render(request, 'precio_ingrediente/precio_ingrediente_modificar.html', {'form': form, 'precio_ingrediente': precio_ingrediente})
 
 @login_required
 @admin_required
-def receta_listar(request):
+def recetas(request):
     recetas = Receta.objects.all()
     recetas_con_ingredientes = []
 
@@ -277,7 +277,7 @@ def receta_listar(request):
         })
 
     contexto = {'recetas_con_ingredientes': recetas_con_ingredientes}
-    return render(request, 'receta/receta_listar.html', contexto)
+    return render(request, 'receta/recetas.html', contexto)
 
 
 @login_required
@@ -290,7 +290,7 @@ def receta_crear(request):
             receta = receta_form.save()
             ingrediente_formset.instance = receta
             ingrediente_formset.save()
-            return redirect('receta_listar')
+            return redirect('recetas')
         else:
             # Manejo de errores de validación
             print(receta_form.errors)
@@ -315,7 +315,7 @@ def receta_modificar(request, receta_id):
         if receta_form.is_valid() and ingrediente_formset.is_valid():
             receta = receta_form.save()
             ingrediente_formset.save()
-            return redirect('receta_listar')
+            return redirect('recetas')
         else:
             # Manejo de errores
             print(receta_form.errors)
