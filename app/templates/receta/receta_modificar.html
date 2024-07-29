@@ -2,23 +2,26 @@
 
 {% block content %}
 <h1>Modificar Receta</h1>
-<form method="post">
-  {% csrf_token %}
-  {{ receta_form.as_p }}
-  <div id="ingrediente-formset">
-    {{ ingrediente_formset.management_form }}
-    {% for form in ingrediente_formset %}
-      <div class="ingrediente-form">
-        {{ form.as_p }}
-        {% if ingrediente_formset.can_delete %}
-          <button type="button" class="delete-ingredient">Eliminar</button>
-        {% endif %}
-      </div>
-    {% endfor %}
-  </div>
-  <button type="button" id="add-ingredient">Añadir Ingrediente</button>
-  <button type="submit">Guardar</button>
-</form>
+<div class="card p-4">
+  <form method="post">
+    {% csrf_token %}
+    {{ receta_form.as_p }}
+    <div id="ingrediente-formset">
+      {{ ingrediente_formset.management_form }}
+      {% for form in ingrediente_formset %}
+        <div class="ingrediente-form">
+          {{ form.as_p }}
+          {% if ingrediente_formset.can_delete %}
+            <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <button type="button" id="add-ingredient" class="btn btn-warning">Añadir Ingrediente</button>
+    <button type="submit" class="btn btn-color">Modificar</button>
+    <a href="{% url 'recetas' %}" class="btn btn-dark">Cancelar</a>
+  </form>
+</div>
 
 <script>
  document.addEventListener("DOMContentLoaded", function() {
