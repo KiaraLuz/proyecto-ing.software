@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Mantenimiento de Precios de Productos</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'precio_producto_crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+    <tr>
+      <td scope="col">Id</td>
+      <td scope="col">Producto</td>
+      <td scope="col">Precio(S/.)</td>
+      <th colspan="2">Opciones</th>
+    </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    {% for precio in precios %}
+    <tr>
+        <td>{{ precio.id }}</td>
+        <td>{{ precio.producto.nombre_producto }}</td>
+        <td>{{ precio.precio_producto }}</td>
+
+        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'precio_producto_modificar' precio.id %}" role="button">
+          <i class="bi bi-pencil-square"></i>
+          Modificar
+        </a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
