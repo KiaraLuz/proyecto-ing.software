@@ -1,16 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import Rol, Usuario, Ingrediente, Producto,PrecioProducto,PrecioIngrediente, Receta, RecetaIngrediente
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm,PrecioProductoForm,PrecioIngredienteForm,RecetaForm, RecetaIngredienteFormSet
+from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente 
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from .decorators import admin_required
-#from django.core.serializers.json import DjangoJSONEncoder
-#import json
 from django.forms import inlineformset_factory
-
-#from django.db import transaction
-
+from django.http import JsonResponse
 
 # Create your views here.
 @login_required
@@ -194,70 +190,6 @@ def producto_modificar(request, producto_id):
 
 @login_required
 @admin_required
-def precio_productos(request):
-    precios = PrecioProducto.objects.all()
-    return render(request, 'precio_producto/precio_productos.html', {'precios': precios})
-
-@login_required
-@admin_required
-def precio_producto_crear(request):
-    if request.method == "POST":
-        form = PrecioProductoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('precio_productos')  # Asegúrate de que este nombre es correcto
-    else:
-        form = PrecioProductoForm()
-    contexto = {"form": form}
-    return render(request, "precio_producto/precio_producto_crear.html", contexto)
-
-@login_required
-@admin_required
-def precio_producto_modificar(request, precio_producto_id):
-    precio_producto = get_object_or_404(PrecioProducto, id=precio_producto_id)
-    if request.method == "POST":
-        form = PrecioProductoForm(request.POST, instance=precio_producto)
-        if form.is_valid():
-            form.save()
-            return redirect("precio_productos")
-    else:
-        form = PrecioProductoForm(instance=precio_producto)
-    contexto = {"form": form}
-    return render(request, "precio_producto/precio_producto_modificar.html", contexto)
-
-@login_required
-@admin_required
-def precio_ingredientes(request):
-    precios = PrecioIngrediente.objects.all()
-    return render(request, 'precio_ingrediente/precio_ingredientes.html', {'precios': precios})
-
-@login_required
-@admin_required
-def precio_ingrediente_crear(request):
-    if request.method == 'POST':
-        form = PrecioIngredienteForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('precio_ingredientes')
-    else:
-        form = PrecioIngredienteForm()
-    return render(request, 'precio_ingrediente/precio_ingrediente_crear.html', {'form': form})
-
-@login_required
-@admin_required
-def precio_ingrediente_modificar(request, precio_ingrediente_id):
-    precio_ingrediente = get_object_or_404(PrecioIngrediente, id=precio_ingrediente_id)
-    if request.method == 'POST':
-        form = PrecioIngredienteForm(request.POST, instance=precio_ingrediente)
-        if form.is_valid():
-            form.save()
-            return redirect('precio_ingredientes')
-    else:
-        form = PrecioIngredienteForm(instance=precio_ingrediente)
-    return render(request, 'precio_ingrediente/precio_ingrediente_modificar.html', {'form': form, 'precio_ingrediente': precio_ingrediente})
-
-@login_required
-@admin_required
 def recetas(request):
     recetas = Receta.objects.all()
     recetas_con_ingredientes = []
@@ -331,3 +263,56 @@ def receta_modificar(request, receta_id):
     }
     return render(request, 'receta/receta_modificar.html', contexto)
 
+@login_required
+@admin_required
+def costos(request):
+    costos = CostoProducto.objects.all()
+    costos_con_ingredientes = []
+
+    for costo in costos:
+        ingredientes_info = []
+        # Obtener todos los ingredientes asociados a este costo
+        costo_ingredientes = costo.costoproductoingrediente_set.all()
+        for costo_ingrediente in costo_ingredientes:
+            ingredientes_info.append({
+                'nombre': costo_ingrediente.ingrediente.nombre_ingrediente,
+                'cantidad': costo_ingrediente.cantidad,
+                'unidad': costo_ingrediente.unidad.nombre
+            })
+        costos_con_ingredientes.append({
+            'costo': costo,
+            'ingredientes': ingredientes_info
+        })
+
+    contexto = {'costos_con_ingredientes': costos_con_ingredientes}
+    return render(request, 'costo/costos.html', contexto)
+
+@login_required
+@admin_required
+def costo_crear(request):
+    form = CostoProductoForm(request.POST or None)
+    ingredientes = []
+
+    if request.method == 'POST' and form.is_valid():
+        costo_producto = form.save(commit=False)
+        costo_producto.calcular_costo_total()
+        costo_producto.save()
+        
+        producto = form.cleaned_data.get('producto')
+        if producto:
+            receta = get_object_or_404(Receta, producto=producto)
+            ingredientes_receta = RecetaIngrediente.objects.filter(receta=receta).select_related('ingrediente', 'unidad')
+            
+            for ingrediente_receta in ingredientes_receta:
+                CostoProductoIngrediente.objects.create(
+                    costo_producto=costo_producto,
+                    ingrediente=ingrediente_receta.ingrediente,
+                    cantidad=ingrediente_receta.cantidad,
+                    precio_ingrediente=ingrediente_receta.ingrediente.precio_ingrediente,
+                    costo_total=ingrediente_receta.cantidad * ingrediente_receta.ingrediente.precio_ingrediente,
+                    unidad=ingrediente_receta.unidad
+                )
+            
+            ingredientes = ingredientes_receta
+
+    return render(request, 'costo/costo_crear.html', {'form': form, 'ingredientes': ingredientes})
