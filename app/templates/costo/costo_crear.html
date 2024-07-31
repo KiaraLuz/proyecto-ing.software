@@ -1,0 +1,24 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Crear Costo</h1>
+<div class="card p-4">
+  <form method="post" action="{% url 'costo_crear' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" name="seleccionar_producto" class="btn btn-color">Crear</button>
+    <a href="{% url 'costos' %}" class="btn btn-dark">Cancelar</a>
+  </form>
+</div>
+
+{% if ingredientes %}
+<div id="ingredientes-lista" class="card p-4 mt-4">
+    <h3>Desglosamiento de costos de los ingredientes del producto:</h3>
+    <ul>
+        {% for ingrediente in ingredientes %}
+            <li>{{ ingrediente.ingrediente.nombre_ingrediente }}: {{ ingrediente.cantidad }} {{ ingrediente.unidad }} ({{ ingrediente.ingrediente.precio_ingrediente }})</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
