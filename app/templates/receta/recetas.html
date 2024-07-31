@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Lista de Recetas</h1>
-<a class="btn btn-color fw-bold mb-3" href="{% url 'receta_crear' %}" role="button">Crear Receta</a>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'receta_crear' %}" role="button">Crear</a>
 <table class="tb">
   <thead class="encabezado-tabla fw-bold">
     <tr>
@@ -18,7 +18,7 @@
         <td>
             <ul>
             {% for ingrediente in item.ingredientes %}
-                <li>{{ ingrediente.nombre }} ({{ ingrediente.cantidad }} {{ ingrediente.unidad }})</li>
+                <li class="lista-receta">{{ ingrediente.nombre }} ({{ ingrediente.cantidad }} {{ ingrediente.unidad }})</li>
             {% endfor %}
             </ul>
         </td>

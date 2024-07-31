@@ -1,7 +1,3 @@
-body {
-  /* background-color: #111; */
-}
-
 .tb {
   width: 900px;
   text-align: center;
@@ -14,7 +10,6 @@ body {
   background-color: #df4a10;
   color: #242424;
 }
-
 .btn-color:hover {
   background-color: #d9534f;
 }
@@ -61,4 +56,3 @@ h1 span{
     width: 0px;
   }
 }
-

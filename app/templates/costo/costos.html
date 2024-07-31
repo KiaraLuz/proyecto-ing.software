@@ -1,0 +1,42 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Mantenimiento de Costos</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'costo_crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+    <tr>
+      <td scope="col">Id</td>
+      <td scope="col">Nombre</td>
+      <td scope="col">Ingredientes</td>
+      <td scope="col">Precio</td>
+      <th colspan="2">Opciones</th>
+    </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    {% for costo in costos_con_ingredientes %}
+    <tr>
+        <td>{{ costo.costo.id_costo }}</td>
+        <td>{{ costo.costo.producto.nombre_producto }}</td>
+        <td>
+            {% if costo.ingredientes %}
+                {% for ingrediente in costo.ingredientes %}
+                    {{ ingrediente.nombre }} ({{ ingrediente.cantidad }} {{ ingrediente.unidad }})
+                    <br>
+                {% endfor %}
+            {% else %}
+                No hay ingredientes disponibles.
+            {% endif %}
+        </td>
+        <td>{{ costo.costo.costo_total }}</td>
+        <td>
+            <a class="btn btn-color btn-m fw-bold" href="{% url 'costo_crear' %}?id={{ costo.costo.id_costo }}" role="button">
+                <i class="bi bi-pencil-square"></i>
+                Recalcular
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
