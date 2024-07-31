@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, PrecioProducto,PrecioIngrediente,RecetaIngrediente,Receta
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
@@ -118,6 +118,9 @@ class IngredienteForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "checkbox"}),
     )
+    precio_ingrediente = forms.DecimalField(
+        label="Precio", widget=forms.NumberInput(attrs={"class": "input"})
+    )
 
     def __init__(self, *args, **kwargs):
         super(IngredienteForm, self).__init__(*args, **kwargs)
@@ -125,18 +128,18 @@ class IngredienteForm(forms.ModelForm):
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
-        #fields = ['nombre_producto', 'descripcion', 'estado_producto']
-        fields = ['nombre_producto', 'descripcion']
-        labels = {
-            'nombre_producto': 'Nombre del Producto',
-            'descripcion': 'Descripción',
-            #'estado_producto': 'Activo'
-        }
-        widgets = {
-            'nombre_producto': forms.TextInput(attrs={'class': 'form-control'}),
-            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            #'estado_producto': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
+        exclude = ["id_producto"]
+        
+    nombre_producto = forms.CharField(
+        label="Nombre del Producto", widget=forms.TextInput(attrs={"class": "input"})
+    )
+    descripcion = forms.CharField(
+        label="Decripcion", widget=forms.TextInput(attrs={"class": "input"})
+    )
+    precio_producto = forms.DecimalField(
+        label="Precio", widget=forms.NumberInput(attrs={"class": "input"})
+    )
+
 class RecetaIngredienteForm(forms.ModelForm):
     class Meta:
         model = RecetaIngrediente
@@ -162,48 +165,14 @@ RecetaIngredienteFormSet = inlineformset_factory(
     RecetaIngrediente,
     form=RecetaIngredienteForm,
     fields=['ingrediente', 'cantidad', 'unidad'], 
-    #extra=0,# Inicia con un formulario vacío
     can_delete=True
 )
-'''
-class ProductoIngredienteForm(forms.ModelForm):
-    class Meta:
-        model = ProductoIngrediente
-        fields = ['ingrediente', 'cantidad']
-'''
-class PrecioProductoForm(forms.ModelForm):
-    class Meta:
-        model = PrecioProducto
-        fields = ['producto', 'precio_producto']
 
-    producto = forms.ModelChoiceField(
-        label="Producto",
-        queryset=Producto.objects.all(),
-        widget=forms.Select(attrs={"class": "input"})
-    )
-    precio_producto = forms.DecimalField(
-        label="Precio",
-        max_digits=10,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={"class": "input"})
-    )
+class CostoProductoForm(forms.ModelForm):
+    class Meta:
+        model = CostoProducto
+        fields = ['producto']
 
     def __init__(self, *args, **kwargs):
-        super(PrecioProductoForm, self).__init__(*args, **kwargs)
-
-class PrecioIngredienteForm(forms.ModelForm):
-    class Meta:
-        model = PrecioIngrediente
-        fields = ['ingrediente', 'precio_ingrediente','unidad']
-
-    ingrediente = forms.ModelChoiceField(
-        label="Ingrediente",
-        queryset=Ingrediente.objects.all(),
-        widget=forms.Select(attrs={"class": "input"})
-    )
-    precio_ingrediente = forms.DecimalField(
-        label="Precio",
-        max_digits=10,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={"class": "input"})
-    )
+        super().__init__(*args, **kwargs)
+        self.fields['producto'].queryset = Producto.objects.filter(receta__isnull=False).distinct()
