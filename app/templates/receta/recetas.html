@@ -1,0 +1,36 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Lista de Recetas</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'receta_crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+    <tr>
+      <th>Producto</th>
+      <th>Ingredientes</th>
+      <th>Opciones</th>
+    </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    {% for item in recetas_con_ingredientes %}
+    <tr>
+        <td>{{ item.receta.producto.nombre_producto }}</td>
+        <td>
+            <ul>
+            {% for ingrediente in item.ingredientes %}
+                <li class="lista-receta">{{ ingrediente.nombre }} ({{ ingrediente.cantidad }} {{ ingrediente.unidad }})</li>
+            {% endfor %}
+            </ul>
+        </td>
+        <td>
+          <a class="btn btn-color btn-m fw-bold" href="{% url 'receta_modificar' item.receta.id %}" role="button">
+            <i class="bi bi-pencil-square"></i>
+            Modificar
+          </a>
+        </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

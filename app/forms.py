@@ -1,7 +1,8 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, ProductoIngrediente
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
 
 
 class RolForm(forms.ModelForm):
@@ -37,7 +38,6 @@ class RolForm(forms.ModelForm):
         if not nombre_rol and not descripcion:
             raise forms.ValidationError("Datos incompletos")
         return cleaned_data
-
 
 class UsuarioForm(UserCreationForm):
     class Meta:
@@ -96,7 +96,6 @@ class UsuarioChangeForm(UserChangeForm):
                 user.save()
         return user
 
-
 class IngredienteForm(forms.ModelForm):
     class Meta:
         model = Ingrediente
@@ -119,18 +118,61 @@ class IngredienteForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "checkbox"}),
     )
+    precio_ingrediente = forms.DecimalField(
+        label="Precio", widget=forms.NumberInput(attrs={"class": "input"})
+    )
 
     def __init__(self, *args, **kwargs):
         super(IngredienteForm, self).__init__(*args, **kwargs)
 
-
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
-        fields = ['nombre_producto']
+        exclude = ["id_producto"]
+        
+    nombre_producto = forms.CharField(
+        label="Nombre del Producto", widget=forms.TextInput(attrs={"class": "input"})
+    )
+    descripcion = forms.CharField(
+        label="Decripcion", widget=forms.TextInput(attrs={"class": "input"})
+    )
+    precio_producto = forms.DecimalField(
+        label="Precio", widget=forms.NumberInput(attrs={"class": "input"})
+    )
 
-
-class ProductoIngredienteForm(forms.ModelForm):
+class RecetaIngredienteForm(forms.ModelForm):
     class Meta:
-        model = ProductoIngrediente
-        fields = ['ingrediente', 'cantidad']
+        model = RecetaIngrediente
+        fields = ['ingrediente', 'cantidad', 'unidad']
+        widgets = {
+            'ingrediente': forms.Select(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'unidad': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+# Formulario para la receta
+class RecetaForm(forms.ModelForm):
+    class Meta:
+        model = Receta
+        fields = ['producto']
+        widgets = {
+            'producto': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+# Formset para ingredientes de la receta
+RecetaIngredienteFormSet = inlineformset_factory(
+    Receta,
+    RecetaIngrediente,
+    form=RecetaIngredienteForm,
+    fields=['ingrediente', 'cantidad', 'unidad'], 
+    can_delete=True
+)
+
+class CostoProductoForm(forms.ModelForm):
+    class Meta:
+        model = CostoProducto
+        fields = ['producto']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['producto'].queryset = Producto.objects.filter(receta__isnull=False).distinct()

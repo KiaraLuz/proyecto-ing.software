@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     {% load static %}
+    <link rel="shortcut icon" href="{% static 'img/logo.jpg' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
         html, body {
@@ -50,6 +51,12 @@
             height: auto;
             margin-right: 8px; 
         }
+        .custom-icon {
+            margin-right: 0.5rem; 
+            font-weight: bold;
+            font-size: 1.25rem; 
+            color: black;
+        }
     </style>
 </head>
 <body>
@@ -65,30 +72,46 @@
                         <div>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'roles' %}">
-                                    <img src="{% static 'icons/roles.png' %}" alt="Roles" class="icon-image"> Roles
+                                    <i class="bi bi-people-fill custom-icon"></i>
+                                    Roles
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'usuarios' %}">
-                                    <img src="{% static 'icons/usuarios.png' %}" alt="Usuarios" class="icon-image"> Usuarios
+                                    <i class="bi bi-person-circle custom-icon"></i>
+                                    Usuarios
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'ingredientes' %}">
-                                    <img src="{% static 'icons/ingredientes.png' %}" alt="Ingredientes" class="icon-image"> Ingredientes
+                                    <i class="bi bi-basket custom-icon"></i>
+                                    Ingredientes
                                 </a>
                             </li>
                             <li clsss="nav-item">
                                 <a class="nav-link" href="{% url 'productos' %}">
-                                    <i class="bi bi-shop me-2 fw-bold"></i>
+                                    <i class="bi bi-shop custom-icon"></i>
                                     Productos
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'recetas' %}">
+                                    <i class="bi bi-card-list custom-icon"></i>
+                                    Recetas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'costos' %}">
+                                    <i class="bi bi-wallet custom-icon"></i>
+                                    Costos
                                 </a>
                             </li>
                         </div>
                         <div>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'signout' %}">
-                                    <img src="{% static 'icons/signout.png' %}" alt="Signout" class="icon-image"> Signout
+                                    <i class="bi bi-box-arrow-right custom-icon"></i>
+                                    Signout
                                 </a>
                             </li>
                         </div>
