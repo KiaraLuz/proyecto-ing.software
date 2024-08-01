@@ -2,11 +2,14 @@
 
 {% block content %}
 <h1>Modificar Receta</h1>
-<div class="card p-4">
-  <form method="post">
-    {% csrf_token %}
-    {{ receta_form.as_p }}
-    <div id="ingrediente-formset">
+<div class="card p-4" class="w-60">
+  <form method="post" >
+    <div class="head-product border rounded p-4">
+      {% csrf_token %}
+      {{ receta_form.as_p }}
+    </div>
+    <br/><br/>
+    <div id="ingrediente-formset" class="d-flex flex-wrap gap-5 justify-content-between">
       {{ ingrediente_formset.management_form }}
       {% for form in ingrediente_formset %}
         <div class="ingrediente-form">
