@@ -3,8 +3,6 @@ from django.forms import inlineformset_factory
 from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-
-
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
@@ -150,7 +148,6 @@ class RecetaIngredienteForm(forms.ModelForm):
             'unidad': forms.Select(attrs={'class': 'form-control'}),
         }
 
-# Formulario para la receta
 class RecetaForm(forms.ModelForm):
     class Meta:
         model = Receta
@@ -159,7 +156,6 @@ class RecetaForm(forms.ModelForm):
             'producto': forms.Select(attrs={'class': 'form-control'}),
         }
 
-# Formset para ingredientes de la receta
 RecetaIngredienteFormSet = inlineformset_factory(
     Receta,
     RecetaIngrediente,
