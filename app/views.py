@@ -242,24 +242,24 @@ def receta_crear(request):
 @admin_required
 def receta_modificar(request, receta_id):
     receta = get_object_or_404(Receta, id=receta_id)
+
     if request.method == "POST":
         receta_form = RecetaForm(request.POST, instance=receta)
-        ingrediente_formset = RecetaIngredienteFormSetMod(request.POST, instance=receta, prefix='ingrediente')
+        ingrediente_formset = RecetaIngredienteFormSetMod(request.POST, instance=receta)
+
         if receta_form.is_valid() and ingrediente_formset.is_valid():
-            receta = receta_form.save()
+            receta_form.save()
             ingrediente_formset.save()
             return redirect('recetas')
     else:
         receta_form = RecetaForm(instance=receta)
-        queryset = RecetaIngrediente.objects.filter(receta=receta)
-        ingrediente_formset = RecetaIngredienteFormSetMod(instance=receta, queryset=queryset, prefix='ingrediente')
+        ingrediente_formset = RecetaIngredienteFormSetMod(instance=receta)
 
     contexto = {
         'receta_form': receta_form,
         'ingrediente_formset': ingrediente_formset,
     }
     return render(request, 'receta/receta_modificar.html', contexto)
-
 
 
 

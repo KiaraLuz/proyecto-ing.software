@@ -176,8 +176,6 @@ RecetaIngredienteFormSetMod = inlineformset_factory(
     extra=0
 )
 
-
-
 class CostoProductoForm(forms.ModelForm):
     class Meta:
         model = CostoProducto

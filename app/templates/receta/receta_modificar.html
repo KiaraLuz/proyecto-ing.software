@@ -13,19 +13,42 @@
       {{ ingrediente_formset.management_form }}
       {% for form in ingrediente_formset %}
         <div class="ingrediente-form">
-          {{ form.as_p }}
-          {% if ingrediente_formset.can_delete %}
-            <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
-          {% endif %}
+          {{ form.non_field_errors }}
+          {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+          <div class="form-group">
+            {{ form.ingrediente.label_tag }} {{ form.ingrediente }}
+          </div>
+          <div class="form-group">
+            {{ form.cantidad.label_tag }} {{ form.cantidad }}
+          </div>
+          <div class="form-group">
+            {{ form.unidad.label_tag }} {{ form.unidad }}
+          </div>
+          <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
+          <!-- Campo de eliminación oculto -->
+          {{ form.DELETE.as_hidden }}
         </div>
       {% endfor %}
       <!-- Template for empty form -->
       <div id="empty-form-template" style="display: none;">
         <div class="ingrediente-form">
-          {{ ingrediente_formset.empty_form.as_p|safe }}
-          {% if ingrediente_formset.can_delete %}
-            <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
-          {% endif %}
+          {% for hidden in ingrediente_formset.empty_form.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+          <div class="form-group">
+            {{ ingrediente_formset.empty_form.ingrediente.label_tag }} {{ ingrediente_formset.empty_form.ingrediente }}
+          </div>
+          <div class="form-group">
+            {{ ingrediente_formset.empty_form.cantidad.label_tag }} {{ ingrediente_formset.empty_form.cantidad }}
+          </div>
+          <div class="form-group">
+            {{ ingrediente_formset.empty_form.unidad.label_tag }} {{ ingrediente_formset.empty_form.unidad }}
+          </div>
+          <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
+          <!-- Campo de eliminación oculto -->
+          {{ ingrediente_formset.empty_form.DELETE.as_hidden }}
         </div>
       </div>
     </div>
@@ -36,7 +59,7 @@
 </div>
 
 <script>
- document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
     var formCount = parseInt("{{ ingrediente_formset.total_form_count }}");
     var container = document.getElementById("ingrediente-formset");
     var addButton = document.getElementById("add-ingredient");
@@ -47,7 +70,7 @@
         var newForm = template.replace(/__prefix__/g, formCount);
         container.insertAdjacentHTML('beforeend', newForm);
         formCount++;
-        document.getElementById("id_ingrediente-TOTAL_FORMS").value = formCount;
+        document.getElementById("id_" + formPrefix + "-TOTAL_FORMS").value = formCount;
     }
 
     addButton.onclick = function() {
@@ -57,9 +80,12 @@
     container.addEventListener("click", function(e) {
         if (e.target.classList.contains("delete-ingredient")) {
             e.preventDefault();
-            e.target.closest(".ingrediente-form").remove();
-            formCount--;
-            document.getElementById("id_ingrediente-TOTAL_FORMS").value = formCount;
+            var formDiv = e.target.closest(".ingrediente-form");
+            formDiv.style.display = 'none';
+            var deleteInput = formDiv.querySelector('input[name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.value = 'on'; // Marcar para eliminar
+            }
         }
     });
 });
