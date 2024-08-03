@@ -59,3 +59,6 @@ h1 span{
 .head-product{
   background-color: #f8eed4;
 }
+.delete-ingredient{
+  margin: 1em;
+}
