@@ -3,8 +3,6 @@ from django.forms import inlineformset_factory
 from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-
-
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
@@ -150,7 +148,6 @@ class RecetaIngredienteForm(forms.ModelForm):
             'unidad': forms.Select(attrs={'class': 'form-control'}),
         }
 
-# Formulario para la receta
 class RecetaForm(forms.ModelForm):
     class Meta:
         model = Receta
@@ -159,13 +156,24 @@ class RecetaForm(forms.ModelForm):
             'producto': forms.Select(attrs={'class': 'form-control'}),
         }
 
-# Formset para ingredientes de la receta
+# Para la vista de creación, puedes mantener los formularios adicionales vacíos si es necesario
 RecetaIngredienteFormSet = inlineformset_factory(
     Receta,
     RecetaIngrediente,
     form=RecetaIngredienteForm,
-    fields=['ingrediente', 'cantidad', 'unidad'], 
-    can_delete=True
+    fields=['ingrediente', 'cantidad', 'unidad'],
+    can_delete=True,
+    extra=1  # O el número de formularios vacíos que desees mostrar inicialmente
+)
+
+# Para la vista de modificación, asegúrate de que no se generen formularios vacíos adicionales
+RecetaIngredienteFormSetMod = inlineformset_factory(
+    Receta,
+    RecetaIngrediente,
+    form=RecetaIngredienteForm,
+    fields=['ingrediente', 'cantidad', 'unidad'],
+    can_delete=True,
+    extra=0
 )
 
 class CostoProductoForm(forms.ModelForm):

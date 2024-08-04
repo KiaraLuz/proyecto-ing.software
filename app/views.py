@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente 
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -211,7 +211,6 @@ def recetas(request):
     contexto = {'recetas_con_ingredientes': recetas_con_ingredientes}
     return render(request, 'receta/recetas.html', contexto)
 
-
 @login_required
 @admin_required
 def receta_crear(request):
@@ -229,7 +228,8 @@ def receta_crear(request):
             print(ingrediente_formset.errors)
     else:
         receta_form = RecetaForm()
-        ingrediente_formset = RecetaIngredienteFormSet(prefix='ingrediente')
+        # Crear un formset con un formulario vacío inicial
+        ingrediente_formset = RecetaIngredienteFormSet(prefix='ingrediente', queryset=RecetaIngrediente.objects.none())
 
     contexto = {
         'receta_form': receta_form,
@@ -237,31 +237,31 @@ def receta_crear(request):
     }
     return render(request, 'receta/receta_crear.html', contexto)
 
+
 @login_required
 @admin_required
 def receta_modificar(request, receta_id):
     receta = get_object_or_404(Receta, id=receta_id)
+
     if request.method == "POST":
         receta_form = RecetaForm(request.POST, instance=receta)
-        ingrediente_formset = RecetaIngredienteFormSet(request.POST, instance=receta, prefix='ingrediente')
+        ingrediente_formset = RecetaIngredienteFormSetMod(request.POST, instance=receta)
+
         if receta_form.is_valid() and ingrediente_formset.is_valid():
-            receta = receta_form.save()
+            receta_form.save()
             ingrediente_formset.save()
             return redirect('recetas')
-        else:
-            # Manejo de errores
-            print(receta_form.errors)
-        
-            print(ingrediente_formset.errors)
     else:
         receta_form = RecetaForm(instance=receta)
-        ingrediente_formset = RecetaIngredienteFormSet(instance=receta, prefix='ingrediente')
+        ingrediente_formset = RecetaIngredienteFormSetMod(instance=receta)
 
     contexto = {
         'receta_form': receta_form,
         'ingrediente_formset': ingrediente_formset,
     }
     return render(request, 'receta/receta_modificar.html', contexto)
+
+
 
 @login_required
 @admin_required
@@ -271,7 +271,6 @@ def costos(request):
 
     for costo in costos:
         ingredientes_info = []
-        # Obtener todos los ingredientes asociados a este costo
         costo_ingredientes = costo.costoproductoingrediente_set.all()
         for costo_ingrediente in costo_ingredientes:
             ingredientes_info.append({
