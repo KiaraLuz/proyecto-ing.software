@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Rol(models.Model):
@@ -40,6 +41,10 @@ class Ingrediente(models.Model):
 
     def __str__(self):
         return self.nombre_ingrediente
+    
+    def clean(self):
+        if self.precio_ingrediente < 0:
+            raise ValidationError('El precio del ingrediente no puede ser negativo.')
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
