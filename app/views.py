@@ -128,9 +128,11 @@ def ingrediente_crear(request):
                 return redirect("ingredientes")
             except ValidationError as e:
                 messages.error(request, str(e))
-                return render(request, "ingrediente/ingrediente_crear.html", {"form": form})
         else:
-            form = IngredienteForm()
+            messages.error(request, "Formulario no válido.")
+    else:
+        form = IngredienteForm()
+
     contexto = {"form": form}
     return render(request, "ingrediente/ingrediente_crear.html", contexto)
 
