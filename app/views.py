@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from .decorators import admin_required
 from django.forms import inlineformset_factory
 from django.http import JsonResponse
+from django.core.exceptions import ValidationError
+from django.contrib import messages
 
 # Create your views here.
 @login_required
@@ -121,10 +123,16 @@ def ingrediente_crear(request):
     if request.method == "POST":
         form = IngredienteForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("ingredientes")
+            try:
+                form.save()
+                return redirect("ingredientes")
+            except ValidationError as e:
+                messages.error(request, str(e))
+        else:
+            messages.error(request, "Formulario no válido.")
     else:
         form = IngredienteForm()
+
     contexto = {"form": form}
     return render(request, "ingrediente/ingrediente_crear.html", contexto)
 
@@ -135,12 +143,17 @@ def ingrediente_modificar(request, ingrediente_id):
     if request.method == "POST":
         form = IngredienteForm(request.POST, instance=ingrediente)
         if form.is_valid():
-            form.save()
-            return redirect("ingredientes")
+            try:
+                form.save()
+                return redirect("ingredientes")
+            except ValidationError as e:
+                messages.error(request, str(e))                
+        else:
+            messages.error(request, "Form is not valid.")
     else:
         form = IngredienteForm(instance=ingrediente)
-    contexto = {"form": form}
-    return render(request, "ingrediente/ingrediente_modificar.html", contexto)
+
+    return render(request, "ingrediente/ingrediente_modificar.html", {"form": form})
 
 @login_required
 @admin_required
@@ -292,26 +305,32 @@ def costo_crear(request):
     form = CostoProductoForm(request.POST or None)
     ingredientes = []
 
-    if request.method == 'POST' and form.is_valid():
-        costo_producto = form.save(commit=False)
-        costo_producto.calcular_costo_total()
-        costo_producto.save()
-        
-        producto = form.cleaned_data.get('producto')
-        if producto:
-            receta = get_object_or_404(Receta, producto=producto)
-            ingredientes_receta = RecetaIngrediente.objects.filter(receta=receta).select_related('ingrediente', 'unidad')
+    if request.method == 'POST':
+        if form.is_valid():
+            try:
+                costo_producto = form.save(commit=False)
+                costo_producto.calcular_costo_total()
+                costo_producto.save()
+                
+                producto = form.cleaned_data.get('producto')
+                if producto:
+                    receta = get_object_or_404(Receta, producto=producto)
+                    ingredientes_receta = RecetaIngrediente.objects.filter(receta=receta).select_related('ingrediente', 'unidad')
+                    
+                    for ingrediente_receta in ingredientes_receta:
+                        CostoProductoIngrediente.objects.create(
+                            costo_producto=costo_producto,
+                            ingrediente=ingrediente_receta.ingrediente,
+                            cantidad=ingrediente_receta.cantidad,
+                            precio_ingrediente=ingrediente_receta.ingrediente.precio_ingrediente,
+                            costo_total=ingrediente_receta.cantidad * ingrediente_receta.ingrediente.precio_ingrediente,
+                            unidad=ingrediente_receta.unidad
+                        )
+                    
+                    ingredientes = ingredientes_receta
+                return redirect('costos')
+            except ValidationError as e:
+                messages.error(request, str(e))
+                return render(request, 'costo/costo_crear.html', {'form': form, 'ingredientes': ingredientes})
             
-            for ingrediente_receta in ingredientes_receta:
-                CostoProductoIngrediente.objects.create(
-                    costo_producto=costo_producto,
-                    ingrediente=ingrediente_receta.ingrediente,
-                    cantidad=ingrediente_receta.cantidad,
-                    precio_ingrediente=ingrediente_receta.ingrediente.precio_ingrediente,
-                    costo_total=ingrediente_receta.cantidad * ingrediente_receta.ingrediente.precio_ingrediente,
-                    unidad=ingrediente_receta.unidad
-                )
-            
-            ingredientes = ingredientes_receta
-
     return render(request, 'costo/costo_crear.html', {'form': form, 'ingredientes': ingredientes})

@@ -10,7 +10,6 @@
       <td scope="col">Nombre</td>
       <td scope="col">Ingredientes</td>
       <td scope="col">Precio (S/.)</td>
-      <th colspan="2">Opciones</th>
     </tr>
   </thead>
   <tbody class="bg-secondary-subtle">
@@ -29,12 +28,6 @@
             {% endif %}
         </td>
         <td>{{ costo.costo.costo_total }}</td>
-        <td>
-            <a class="btn btn-color btn-m fw-bold" href="{% url 'costo_crear' %}?id={{ costo.costo.id_costo }}" role="button">
-                <i class="bi bi-pencil-square"></i>
-                Recalcular
-            </a>
-        </td>
     </tr>
     {% endfor %}
   </tbody>
