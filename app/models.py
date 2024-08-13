@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Rol(models.Model):
@@ -13,7 +13,6 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre_rol
 
-
 class Usuario(AbstractUser):
     id = models.AutoField(primary_key=True)
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE, null=True, blank=False)
@@ -24,7 +23,6 @@ class Usuario(AbstractUser):
     @property
     def is_rol_admin(self):
         return self.rol.is_admin if self.rol else False
-
 
 class UnidadesMedida(models.Model):
     id = models.AutoField(primary_key=True)
@@ -43,12 +41,17 @@ class Ingrediente(models.Model):
 
     def __str__(self):
         return self.nombre_ingrediente
+    
+    def clean(self):
+        if self.precio_ingrediente < 0:
+            raise ValidationError('El precio del ingrediente no puede ser negativo.')
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
     nombre_producto = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
     precio_producto = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) 
+
     def __str__(self):
         return self.nombre_producto
 
@@ -61,7 +64,7 @@ class RecetaIngrediente(models.Model):
     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
     unidad = models.ForeignKey(UnidadesMedida, on_delete=models.CASCADE)
-    
+
 class CostoProducto(models.Model):
     id_costo = models.AutoField(primary_key=True)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
@@ -72,18 +75,10 @@ class CostoProducto(models.Model):
         return f"Costo de {self.producto.nombre_producto} - {self.costo_total if self.costo_total else 'No calculado'}"
 
     def calcular_costo_total(self):
-        if not Receta.objects.filter(producto=self.producto).exists():
-            self.costo_total = 0
-            self.save()
-            return
-
         receta_ingredientes = RecetaIngrediente.objects.filter(receta__producto=self.producto)
-        costo_total = 0
-        for ri in receta_ingredientes:
-            costo_total += ri.cantidad * ri.ingrediente.precio_ingrediente
+        costo_total = sum(ri.cantidad * ri.ingrediente.precio_ingrediente for ri in receta_ingredientes)
         self.costo_total = costo_total
         self.save()
-
 
 class CostoProductoIngrediente(models.Model):
     costo_producto = models.ForeignKey(CostoProducto, on_delete=models.CASCADE)

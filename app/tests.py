@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from .models import Rol, Usuario, Ingrediente
 from .forms import RolForm, UsuarioForm, UsuarioChangeForm, IngredienteForm
+
 class RolFormTestCase(TestCase):
     def setUp(self):
         self.rol1 = Rol.objects.create(
@@ -179,7 +180,6 @@ class UsuarioFormTestCase(TestCase):
         form = UsuarioForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("password2", form.errors)
-
 
 class IngredienteFormTestCase(TestCase):
     def setUp(self):

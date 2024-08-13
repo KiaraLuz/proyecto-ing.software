@@ -4,73 +4,90 @@
 <h1>Modificar Receta</h1>
 <div class="card p-4">
   <form method="post">
-    {% csrf_token %}
-    {{ receta_form.as_p }}
-    <div id="ingrediente-formset">
+    <div class="head-product border rounded p-4">
+      {% csrf_token %}
+      {{ receta_form.as_p }}
+    </div>
+    <br/><br/>
+    <div id="ingrediente-formset" class="d-flex flex-wrap gap-5 justify-content-between">
       {{ ingrediente_formset.management_form }}
       {% for form in ingrediente_formset %}
         <div class="ingrediente-form">
-          {{ form.as_p }}
-          {% if ingrediente_formset.can_delete %}
-            <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
-          {% endif %}
+          {{ form.non_field_errors }}
+          {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+          <div class="form-group">
+            {{ form.ingrediente.label_tag }} {{ form.ingrediente }}
+          </div>
+          <div class="form-group">
+            {{ form.cantidad.label_tag }} {{ form.cantidad }}
+          </div>
+          <div class="form-group">
+            {{ form.unidad.label_tag }} {{ form.unidad }}
+          </div>
+          <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
+          <!-- Campo de eliminación oculto -->
+          {{ form.DELETE.as_hidden }}
         </div>
       {% endfor %}
+      <!-- Template for empty form -->
+      <div id="empty-form-template" style="display: none;">
+        <div class="ingrediente-form">
+          {% for hidden in ingrediente_formset.empty_form.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+          <div class="form-group">
+            {{ ingrediente_formset.empty_form.ingrediente.label_tag }} {{ ingrediente_formset.empty_form.ingrediente }}
+          </div>
+          <div class="form-group">
+            {{ ingrediente_formset.empty_form.cantidad.label_tag }} {{ ingrediente_formset.empty_form.cantidad }}
+          </div>
+          <div class="form-group">
+            {{ ingrediente_formset.empty_form.unidad.label_tag }} {{ ingrediente_formset.empty_form.unidad }}
+          </div>
+          <button type="button" class="delete-ingredient btn btn-danger mb-2">Eliminar</button>
+          <!-- Campo de eliminación oculto -->
+          {{ ingrediente_formset.empty_form.DELETE.as_hidden }}
+        </div>
+      </div>
     </div>
     <button type="button" id="add-ingredient" class="btn btn-warning">Añadir Ingrediente</button>
-    <button type="submit" class="btn btn-color">Modificar</button>
+    <button type="submit" class="btn btn-color">Guardar</button>
     <a href="{% url 'recetas' %}" class="btn btn-dark">Cancelar</a>
   </form>
 </div>
 
 <script>
- document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
     var formCount = parseInt("{{ ingrediente_formset.total_form_count }}");
     var container = document.getElementById("ingrediente-formset");
     var addButton = document.getElementById("add-ingredient");
+    var formPrefix = "{{ ingrediente_formset.prefix }}";
+
+    function addForm() {
+        var template = document.getElementById("empty-form-template").innerHTML;
+        var newForm = template.replace(/__prefix__/g, formCount);
+        container.insertAdjacentHTML('beforeend', newForm);
+        formCount++;
+        document.getElementById("id_" + formPrefix + "-TOTAL_FORMS").value = formCount;
+    }
 
     addButton.onclick = function() {
-        // Clonar el último formulario de ingrediente
-        var newForm = container.children[container.children.length - 1].cloneNode(true);
-        var formRegex = new RegExp(`form-(\\d){1}-`, 'g');
-
-        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formCount}-`);
-        newForm.className = "ingrediente-form";
-
-        // Actualizar los atributos id y name de los campos en el nuevo formulario
-        var inputs = newForm.querySelectorAll('input, select');
-        inputs.forEach(function(input) {
-            if (input.id) input.id = input.id.replace(/form-\d-/g, 'form-' + formCount + '-');
-            if (input.name) input.name = input.name.replace(/form-\d-/g, 'form-' + formCount + '-');
-            input.value = ''; // Limpiar el valor del campo
-        });
-
-        container.appendChild(newForm);
-        formCount++;
-        document.getElementById("id_ingrediente-TOTAL_FORMS").value = formCount;
-
-        // Añadir botón de eliminar si no existe
-        var deleteButton = newForm.querySelector(".delete-ingredient");
-        if (!deleteButton) {
-            deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.className = "delete-ingredient";
-            deleteButton.innerText = "Eliminar";
-            newForm.appendChild(deleteButton);
-        }
+        addForm();
     };
 
     container.addEventListener("click", function(e) {
         if (e.target.classList.contains("delete-ingredient")) {
             e.preventDefault();
-            e.target.closest(".ingrediente-form").remove();
-            formCount--;
-            document.getElementById("id_ingrediente-TOTAL_FORMS").value = formCount;
+            var formDiv = e.target.closest(".ingrediente-form");
+            formDiv.style.display = 'none';
+            var deleteInput = formDiv.querySelector('input[name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.value = 'on'; // Marcar para eliminar
+            }
         }
     });
 });
-
-  </script>
-  
-
+</script>
 {% endblock %}
