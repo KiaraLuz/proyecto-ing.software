@@ -155,6 +155,12 @@ class RecetaForm(forms.ModelForm):
         widgets = {
             'producto': forms.Select(attrs={'class': 'form-control'}),
         }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Excluir productos que ya tienen una receta asociada
+        productos_con_receta = Receta.objects.values_list('producto', flat=True)
+        self.fields['producto'].queryset = Producto.objects.exclude(id_producto__in=productos_con_receta)
 
 # Para la vista de creación, puedes mantener los formularios adicionales vacíos si es necesario
 RecetaIngredienteFormSet = inlineformset_factory(
@@ -183,4 +189,5 @@ class CostoProductoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['producto'].queryset = Producto.objects.filter(receta__isnull=False).distinct()
+        productos_con_costo = CostoProducto.objects.values_list('producto', flat=True)
+        self.fields['producto'].queryset = Producto.objects.exclude(id_producto__in=productos_con_costo)
