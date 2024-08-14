@@ -9,6 +9,7 @@ from django.forms import inlineformset_factory
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from decimal import Decimal
 
 # Create your views here.
 @login_required
@@ -334,3 +335,28 @@ def costo_crear(request):
                 return render(request, 'costo/costo_crear.html', {'form': form, 'ingredientes': ingredientes})
             
     return render(request, 'costo/costo_crear.html', {'form': form, 'ingredientes': ingredientes})
+
+@login_required
+@admin_required
+def ganancia(request):
+    margen_ganancia = request.POST.get('margen_ganancia', 0)
+    costos = CostoProducto.objects.all()
+    productos_con_costos = []
+
+    try:
+        margen_ganancia = Decimal(margen_ganancia)
+    except ValueError:
+        margen_ganancia = 0
+        messages.error(request, "Por favor, ingrese un valor numérico válido para el margen de ganancia.")
+
+    for costo in costos:
+        precio_con_ganancia = costo.costo_total + (costo.costo_total * margen_ganancia / 100)
+        productos_con_costos.append({
+            'id': costo.producto.id_producto,
+            'nombre': costo.producto.nombre_producto,
+            'costo': costo.costo_total,
+            'precio_con_ganancia': precio_con_ganancia
+        })
+
+    contexto = {'productos_con_costos': productos_con_costos, 'margen_ganancia': margen_ganancia}
+    return render(request, 'ganancia/ganancia.html', contexto)
