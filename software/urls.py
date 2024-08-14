@@ -42,5 +42,7 @@ urlpatterns = [
     path('recetas/modificar/<int:receta_id>/', views.receta_modificar, name='receta_modificar'),
     path('costos/', views.costos, name='costos'),
     path('costos/crear/', views.costo_crear, name='costo_crear'),
-    path('ganancia/', views.ganancia, name='ganancia'),
+    path('ganancias/', views.ganancia, name='ganancias'),
+    path('ganancia/crear/', views.ganancia_crear, name='ganancia_crear'),
+    path('ganancia/modificar/<int:ganancia_id>/', views.ganancia_modificar, name='ganancia_modificar'),
 ]
