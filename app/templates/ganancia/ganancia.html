@@ -1,0 +1,32 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Mantenimiento de Margenes de ganancia</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'ganancia_crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+        <tr>
+            <td scope="col">Id</td>
+            <td scope="col">Nombre</td>
+            <td scope="col">Costos (S/.)</td>  
+            <td colspan="col">Precios (S/.)</th>
+            <th colspan="2">Opciones</th>
+         </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    {% for ganancia in ganancias %}  
+    <tr>
+        <td>{{ ganancia.id_ganancia }}</td>
+        <td>{{ ganancia.nombre_producto }}</td>
+        <td>{{ ganancia.costo_producto }}</td>        
+        <td>{{ ganancia.precio_con_ganancia }}</td>
+        <td><a class="btn btn-color btn-m fw-bold" role="button" href="{% url 'ganancia_modificar' ganancia.id_ganancia %}">
+          <i class="bi bi-pencil-square"></i>
+          Modificar
+        </a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
