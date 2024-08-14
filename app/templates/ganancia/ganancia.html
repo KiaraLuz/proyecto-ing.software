@@ -2,30 +2,28 @@
 
 {% block content %}
 <h1>Mantenimiento de Margenes de ganancia</h1>
-
-<form method="post">
-  {% csrf_token %}
-  <label for="margen_ganancia">Margen de ganancia deseado:</label>
-  <input type="text" id="margen_ganancia" name="margen_ganancia" value="{{ margen_ganancia }}">
-  <button type="submit">Calcular</button>
-</form>
-
+<a class="btn btn-color fw-bold mb-3" href="{% url 'ganancia_crear' %}" role="button">Crear</a>
 <table class="tb">
   <thead class="encabezado-tabla fw-bold">
         <tr>
             <td scope="col">Id</td>
             <td scope="col">Nombre</td>
             <td scope="col">Costos (S/.)</td>  
-            <th colspan="2">Precios (S/.)</th>
+            <td colspan="col">Precios (S/.)</th>
+            <th colspan="2">Opciones</th>
          </tr>
   </thead>
   <tbody class="bg-secondary-subtle">
-    {% for ganancia in productos_con_costos %}  
+    {% for ganancia in ganancias %}  
     <tr>
-        <td>{{ ganancia.id }}</td>
-        <td>{{ ganancia.nombre }}</td>
-        <td>{{ ganancia.costo }}</td>        
+        <td>{{ ganancia.id_ganancia }}</td>
+        <td>{{ ganancia.nombre_producto }}</td>
+        <td>{{ ganancia.costo_producto }}</td>        
         <td>{{ ganancia.precio_con_ganancia }}</td>
+        <td><a class="btn btn-color btn-m fw-bold" role="button" href="{% url 'ganancia_modificar' ganancia.id_ganancia %}">
+          <i class="bi bi-pencil-square"></i>
+          Modificar
+        </a></td>
     </tr>
     {% endfor %}
   </tbody>

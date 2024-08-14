@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente 
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod
+from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -339,24 +339,58 @@ def costo_crear(request):
 @login_required
 @admin_required
 def ganancia(request):
-    margen_ganancia = request.POST.get('margen_ganancia', 0)
-    costos = CostoProducto.objects.all()
-    productos_con_costos = []
-
-    try:
-        margen_ganancia = Decimal(margen_ganancia)
-    except ValueError:
-        margen_ganancia = 0
-        messages.error(request, "Por favor, ingrese un valor numérico válido para el margen de ganancia.")
-
-    for costo in costos:
-        precio_con_ganancia = costo.costo_total + (costo.costo_total * margen_ganancia / 100)
-        productos_con_costos.append({
-            'id': costo.producto.id_producto,
-            'nombre': costo.producto.nombre_producto,
-            'costo': costo.costo_total,
-            'precio_con_ganancia': precio_con_ganancia
-        })
-
-    contexto = {'productos_con_costos': productos_con_costos, 'margen_ganancia': margen_ganancia}
+    ganancias = Ganancia.objects.all()
+    contexto = {'ganancias': ganancias}
     return render(request, 'ganancia/ganancia.html', contexto)
+
+@login_required
+@admin_required
+def ganancia_crear(request):
+    if request.method == 'POST':
+        form = GananciaForm(request.POST)
+        if form.is_valid():
+            producto = form.cleaned_data['producto']
+            margen_ganancia = form.cleaned_data['margen_ganancia']
+
+            precio_con_ganancia = producto.costo_total + (producto.costo_total * margen_ganancia / 100)
+
+            Ganancia.objects.create(
+                nombre_producto=producto.producto.nombre_producto,
+                costo_producto=producto.costo_total,
+                precio_con_ganancia=precio_con_ganancia
+            )
+
+            messages.success(request, "Ganancia creada exitosamente.")
+            return redirect('ganancias') 
+
+    else:
+        form = GananciaForm()
+
+    return render(request, 'ganancia/ganancia_crear.html', {'form': form})
+
+@login_required
+@admin_required
+def ganancia_modificar(request, ganancia_id):
+    ganancia = get_object_or_404(Ganancia, id_ganancia=ganancia_id)
+
+    if request.method == 'POST':
+        form = ModificarGananciaForm(request.POST)
+        if form.is_valid():
+            margen_ganancia = Decimal(form.cleaned_data['margen_ganancia'])
+
+            # Obtener el costo total desde CostoProducto relacionado al producto
+            costo_total = CostoProducto.objects.get(producto__nombre_producto=ganancia.nombre_producto).costo_total
+            
+            # Calcular el nuevo precio con el margen de ganancia
+            precio_con_ganancia = costo_total + (costo_total * margen_ganancia / 100)
+            
+            # Actualizar el precio con ganancia sin guardar el margen
+            ganancia.precio_con_ganancia = precio_con_ganancia
+            ganancia.save()
+
+            messages.success(request, "El precio de ganancia ha sido actualizado exitosamente.")
+            return redirect('ganancias')  # Redirige a la vista de ganancia
+    else:
+        form = ModificarGananciaForm()
+
+    return render(request, 'ganancia/ganancia_modificar.html', {'form': form, 'ganancia': ganancia})
