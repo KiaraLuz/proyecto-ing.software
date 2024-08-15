@@ -1,0 +1,46 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <h1>Crear Venta</h1>
+    <form method="post" id="venta-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.producto.errors }}
+        {{ form.cantidad.errors }}
+
+        <div>
+            <label for="{{ form.producto.id_for_label }}">Producto:</label>
+            {{ form.producto }}
+        </div>
+
+        <div>
+            <label for="{{ form.cantidad.id_for_label }}">Cantidad:</label>
+            {{ form.cantidad }}
+        </div>
+        <div>
+            <label for="fecha">Fecha:</label>
+            <input type="text" id="fecha" name="fecha" value="{{ fecha_actual }}" readonly>
+        </div>
+    
+        <div>
+            <label for="id_precio">Precio:</label>
+            <input type="text" id="id_precio" name="precio" readonly> 
+        </div>
+    
+        <button type="submit">Guardar</button>
+    </form>
+   
+    <script>
+        document.getElementById('id_producto').addEventListener('change', function() {
+        var nombreProducto = this.options[this.selectedIndex].text;
+    
+            fetch(`/obtener_precio/?nombre_producto=${nombreProducto}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('id_precio').value = data.precio;
+            });
+        });
+</script>
+
+    
+{% endblock %}

@@ -98,3 +98,18 @@ class Ganancia(models.Model):
 
     def __str__(self):
         return f'Ganancia para {self.nombre_producto}'
+
+class Venta(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField()
+    precio = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    fecha = models.DateField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # Obtiene el precio de ganancia para el producto seleccionado
+        try:
+            ganancia = Ganancia.objects.get(nombre_producto=self.producto.nombre_producto)
+            self.precio = ganancia.precio_con_ganancia
+        except Ganancia.DoesNotExist:
+            self.precio = 0  # O algún valor predeterminado si no se encuentra ganancia
+        super().save(*args, **kwargs)

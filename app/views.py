@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm
+from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia,Venta
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm,VentaForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from decimal import Decimal
+from datetime import datetime
+
 
 # Create your views here.
 @login_required
@@ -251,7 +253,6 @@ def receta_crear(request):
     }
     return render(request, 'receta/receta_crear.html', contexto)
 
-
 @login_required
 @admin_required
 def receta_modificar(request, receta_id):
@@ -274,8 +275,6 @@ def receta_modificar(request, receta_id):
         'ingrediente_formset': ingrediente_formset,
     }
     return render(request, 'receta/receta_modificar.html', contexto)
-
-
 
 @login_required
 @admin_required
@@ -394,3 +393,31 @@ def ganancia_modificar(request, ganancia_id):
         form = ModificarGananciaForm()
 
     return render(request, 'ganancia/ganancia_modificar.html', {'form': form, 'ganancia': ganancia})
+
+@login_required
+@admin_required
+def venta_listar(request):
+    ventas = Venta.objects.all()
+    return render(request, 'venta/venta_listar.html', {'ventas': ventas})
+
+@login_required
+@admin_required
+def venta_crear(request):
+    if request.method == 'POST':
+        form = VentaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('venta_listar')  # Redirige a la vista que lista las ventas
+    else:
+        form = VentaForm()
+        fecha_actual = datetime.now().strftime('%Y-%m-%d') 
+    return render(request, 'venta/venta_crear.html',  {'form': form, 'fecha_actual': fecha_actual})
+
+def obtener_precio(request):
+    nombre_producto = request.GET.get('nombre_producto')
+    try:
+        ganancia = Ganancia.objects.get(nombre_producto=nombre_producto)
+        precio = ganancia.precio_con_ganancia
+    except Ganancia.DoesNotExist:
+        precio = 0
+    return JsonResponse({'precio': precio})

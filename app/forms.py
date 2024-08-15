@@ -1,8 +1,8 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-
+from django.utils import timezone
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
@@ -197,3 +197,15 @@ class ModificarGananciaForm(forms.ModelForm):
         fields = ['margen_ganancia']
 
     margen_ganancia = forms.DecimalField(max_digits=5, decimal_places=2, label="Margen de Ganancia (%)")
+
+class VentaForm(forms.ModelForm):
+    class Meta:
+        model = Venta
+        fields = ['producto', 'cantidad']  # No incluir 'fecha' y 'precio' aquí
+
+    def save(self, commit=True):
+        venta = super().save(commit=False)
+        # No necesitas establecer 'fecha' aquí ya que 'auto_now_add' lo maneja el modelo
+        if commit:
+            venta.save()
+        return venta
