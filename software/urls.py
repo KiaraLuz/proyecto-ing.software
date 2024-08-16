@@ -51,4 +51,5 @@ urlpatterns = [
     path('clientes/', views.clientes, name='clientes'),
     path('clientes/crear/', views.cliente_crear, name='cliente_crear'),
     path('clientes/modificar/<int:cliente_id>/', views.cliente_modificar, name='cliente_modificar'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 ]
