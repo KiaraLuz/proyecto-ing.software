@@ -1,14 +1,13 @@
 {% extends 'layouts/base.html' %}
 
 {% block content %}
-<h1>Crear Venta</h1>
+<h1>Crear</h1>
 <div class="card p-4">
     <form method="post" id="venta-form">
         {% csrf_token %}
         <div class="mb-3">
-            {{ form.non_field_errors }}
-            {{ form.producto.errors }}
-            {{ form.cantidad.errors }}
+            <label for="{{ form.cliente.id_for_label }}">Cliente:</label>
+            {{ form.cliente }}
         </div>
 
         <div class="mb-3">
@@ -31,7 +30,10 @@
             <input type="text" id="id_precio" name="precio" readonly class="form-control"> 
         </div>
     
-        <button type="submit" class="btn btn-color">Guardar</button>
+        <div class="d-flex gap-4">
+            <button type="submit" class="btn btn-color">Registrar</button>
+            <a href="{% url 'ventas' %}" class="btn btn-dark">Cancelar</a>
+        </div>
     </form>
 </div>
 

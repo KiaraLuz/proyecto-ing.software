@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia,Venta
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm,VentaForm
+from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia,Venta, Cliente
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm,VentaForm, ClienteForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -396,9 +396,9 @@ def ganancia_modificar(request, ganancia_id):
 
 @login_required
 @admin_required
-def venta_listar(request):
+def ventas(request):
     ventas = Venta.objects.all()
-    return render(request, 'venta/venta_listar.html', {'ventas': ventas})
+    return render(request, 'venta/ventas.html', {'ventas': ventas})
 
 @login_required
 @admin_required
@@ -407,7 +407,7 @@ def venta_crear(request):
         form = VentaForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('venta_listar')  # Redirige a la vista que lista las ventas
+            return redirect('ventas')
     else:
         form = VentaForm()
         fecha_actual = datetime.now().strftime('%Y-%m-%d') 
@@ -421,3 +421,33 @@ def obtener_precio(request):
     except Ganancia.DoesNotExist:
         precio = 0
     return JsonResponse({'precio': precio})
+
+def clientes(request):
+    clientes = Cliente.objects.all()
+    return render(request, 'cliente/clientes.html', {'clientes': clientes}) 
+
+def cliente_crear(request):
+    if request.method == 'POST':
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('clientes')
+    else:
+        form = ClienteForm()
+
+    return render(request, 'cliente/cliente_crear.html', {'form': form})
+
+@login_required
+@admin_required
+def cliente_modificar(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+
+    if request.method == 'POST':
+        form = ClienteForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            return redirect('clientes')
+    else:
+        form = ClienteForm(instance=cliente)
+    
+    return render(request, 'cliente/cliente_modificar.html', {'form': form, 'cliente': cliente})

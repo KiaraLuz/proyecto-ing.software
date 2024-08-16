@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta, Cliente
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils import timezone
 class RolForm(forms.ModelForm):
@@ -201,11 +201,24 @@ class ModificarGananciaForm(forms.ModelForm):
 class VentaForm(forms.ModelForm):
     class Meta:
         model = Venta
-        fields = ['producto', 'cantidad']  # No incluir 'fecha' y 'precio' aquí
+        fields = ['cliente', 'producto', 'cantidad'] 
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cliente'].queryset = Cliente.objects.all()
 
     def save(self, commit=True):
         venta = super().save(commit=False)
-        # No necesitas establecer 'fecha' aquí ya que 'auto_now_add' lo maneja el modelo
         if commit:
             venta.save()
         return venta
+    
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nombre_cliente', 'correo_cliente', 'telefono_cliente']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['correo_cliente'].required = False
+        self.fields['telefono_cliente'].required = False

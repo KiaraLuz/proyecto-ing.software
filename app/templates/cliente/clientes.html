@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Mantenimiento de Clientes</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'cliente_crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+    <tr>
+      <td scope="col">Id</td>
+      <td scope="col">Nombre</td>
+      <td scope="col">Correo</td>
+      <td scope="col">Teléfono</td>
+      <th colspan="2">Opciones</th>
+    </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    {% for cliente in clientes %}
+    <tr>
+        <td>{{ cliente.id_cliente }}</td>
+        <td>{{ cliente.nombre_cliente }}</td>
+        <td>{{ cliente.correo_cliente }}</td>
+        <td>{{ cliente.telefono_cliente }}</td>
+        <td><a class="btn btn-color btn-m fw-bold" href="{% url 'cliente_modificar' cliente.id_cliente %}" role="button">
+          <i class="bi bi-pencil-square"></i>
+          Modificar
+        </a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
