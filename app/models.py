@@ -50,8 +50,7 @@ class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
     nombre_producto = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
-    precio_producto = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) 
-
+    
     def __str__(self):
         return self.nombre_producto
 
@@ -90,3 +89,35 @@ class CostoProductoIngrediente(models.Model):
 
     def __str__(self):
         return f"{self.costo_producto.producto.nombre_producto} - {self.ingrediente.nombre_ingrediente}: {self.costo_total}"
+    
+class Ganancia(models.Model):
+    id_ganancia = models.AutoField(primary_key=True)
+    nombre_producto = models.CharField(max_length=100)
+    costo_producto = models.DecimalField(max_digits=10, decimal_places=2)
+    precio_con_ganancia = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f'Ganancia para {self.nombre_producto}'
+
+class Cliente(models.Model):
+    id_cliente = models.AutoField(primary_key=True)
+    nombre_cliente = models.CharField(max_length=100)
+    correo_cliente = models.EmailField(blank=True, null=True)
+    telefono_cliente = models.CharField(max_length=9,blank=True, null=True)
+    def __str__(self):
+        return self.nombre_cliente
+    
+class Venta(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField()
+    precio = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    fecha = models.DateField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            ganancia = Ganancia.objects.get(nombre_producto=self.producto.nombre_producto)
+            self.precio = ganancia.precio_con_ganancia
+        except Ganancia.DoesNotExist:
+            self.precio = 0
+        super().save(*args, **kwargs)

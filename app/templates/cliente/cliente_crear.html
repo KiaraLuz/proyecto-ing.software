@@ -1,0 +1,29 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Crear Cliente</h1>
+<div class="card p-4">
+    <form method="post" id="cliente-form">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="{{ form.nombre_cliente.id_for_label }}">Nombre:</label>
+            {{ form.nombre_cliente }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.correo_cliente.id_for_label }}">Correo:</label>
+            {{ form.correo_cliente }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.telefono_cliente.id_for_label }}">Teléfono:</label>
+            {{ form.telefono_cliente }}
+        </div>
+        
+        <div class="d-flex gap-4">
+            <button type="submit" class="btn btn-color">Registrar</button>
+            <a href="{% url 'clientes' %}" class="btn btn-dark">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

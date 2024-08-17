@@ -1,0 +1,17 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Modificar Ganancias</h1>
+<div class="card p-4">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+        {{ form.as_p }}
+        </div>
+        <div class="d-flex gap-4">
+        <button type="submit" class="btn btn-color">Modificar</button>
+        <a href="{% url 'ganancias' %}" class="btn btn-dark">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
