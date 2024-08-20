@@ -11,12 +11,13 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 from decimal import Decimal
 from datetime import datetime
+import matplotlib
+matplotlib.use('Agg')  # Utiliza el backend 'Agg' para evitar problemas en entornos sin display
 import matplotlib.pyplot as plt
 import io
 import urllib, base64
 from django.utils import timezone
 from django.db.models import Sum
-
 
 # Create your views here.
 @login_required
@@ -444,7 +445,7 @@ def cliente_modificar(request, cliente_id):
 
 @login_required
 @admin_required
-def dashboard(request):
+def grafico_ganancias(request):
     ahora = timezone.now()
     ventas = Venta.objects.filter(fecha__year=ahora.year, fecha__month=ahora.month)
     ganancias = {}
@@ -475,5 +476,87 @@ def dashboard(request):
     buffer.seek(0)
     image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
     buffer.close()
+    plt.close(fig)
 
-    return render(request, 'dashboard/dashboard_ganancias.html', {'grafico': image_base64})
+    return image_base64
+
+@login_required
+@admin_required
+def grafico_costos(request):
+    ahora = timezone.now()
+    ventas = Venta.objects.filter(fecha__year=ahora.year, fecha__month=ahora.month)
+    costos = {}
+
+    for producto in Producto.objects.all():
+        costo_producto_obj = CostoProducto.objects.filter(producto=producto).first()
+        costo_producto = costo_producto_obj.costo_total if costo_producto_obj else 0
+
+        cantidad_vendida = ventas.filter(producto=producto).aggregate(total=Sum('cantidad'))['total'] or 0
+
+        costo_total = costo_producto * cantidad_vendida
+        costos[producto.nombre_producto] = costo_total
+
+    productos = list(costos.keys())
+    costos = list(costos.values())
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bar_container = ax.bar(productos, costos, color='lightcoral')
+    ax.set_xlabel('Productos')
+    ax.set_ylabel('Costo Total (S/.)')
+    ax.set_title('Costos Mensuales por Producto')
+    plt.xticks(rotation=45, ha='right')
+    ax.bar_label(bar_container, fmt='{:,.2f}', label_type='edge', padding=3)
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', bbox_inches='tight')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    buffer.close()
+    plt.close(fig)
+
+    return image_base64
+
+@login_required
+@admin_required
+def grafico_ventas(request):
+    ahora = timezone.now()
+    ventas = Venta.objects.filter(fecha__year=ahora.year, fecha__month=ahora.month)
+    # Diccionario para traducir números de meses a nombres en español
+    meses_es = {
+        '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr', '05': 'May', '06': 'Jun',
+        '07': 'Jul', '08': 'Ago', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
+    }
+    meses = [f"{mes:02d}" for mes in range(1, 13)]
+    ventas_mensuales = []
+
+    for mes in meses:
+        ventas_mes = ventas.filter(fecha__month=mes).aggregate(total=Sum('cantidad'))['total'] or 0
+        ventas_mensuales.append(ventas_mes)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(meses, ventas_mensuales, marker='o', linestyle='-', color='teal')
+    ax.set_xlabel('Meses')
+    ax.set_ylabel('Ventas Totales (S/.)')
+    ax.set_title('Ventas Mensuales')
+    ax.set_xticks(meses)
+    ax.set_xticklabels([meses_es[mes] for mes in meses])
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', bbox_inches='tight')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    buffer.close()
+    plt.close(fig)
+
+    return image_base64
+
+@login_required
+@admin_required
+def dashboard(request):
+    grafico_ganancias_img = grafico_ganancias(request)
+    grafico_costos_img = grafico_costos(request)
+    grafico_ventas_img = grafico_ventas(request)
+
+    return render(request, 'dashboard/dashboard.html', {
+        'grafico_ganancias': grafico_ganancias_img,
+        'grafico_costos': grafico_costos_img,
+        'grafico_ventas': grafico_ventas_img
+    })
