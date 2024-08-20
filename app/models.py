@@ -89,7 +89,7 @@ class CostoProductoIngrediente(models.Model):
 
     def __str__(self):
         return f"{self.costo_producto.producto.nombre_producto} - {self.ingrediente.nombre_ingrediente}: {self.costo_total}"
-    
+
 class Ganancia(models.Model):
     id_ganancia = models.AutoField(primary_key=True)
     nombre_producto = models.CharField(max_length=100)
@@ -106,7 +106,7 @@ class Cliente(models.Model):
     telefono_cliente = models.CharField(max_length=9,blank=True, null=True)
     def __str__(self):
         return self.nombre_cliente
-    
+
 class Venta(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)

@@ -3,6 +3,7 @@ from django.forms import inlineformset_factory
 from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta, Cliente
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils import timezone
+
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
@@ -132,7 +133,7 @@ class ProductoForm(forms.ModelForm):
         label="Nombre del Producto", widget=forms.TextInput(attrs={"class": "input"})
     )
     descripcion = forms.CharField(
-        label="Decripcion", widget=forms.TextInput(attrs={"class": "input"})
+        label="Descripción", widget=forms.TextInput(attrs={"class": "input"})
     )
 
 class RecetaIngredienteForm(forms.ModelForm):
@@ -212,7 +213,7 @@ class VentaForm(forms.ModelForm):
         if commit:
             venta.save()
         return venta
-    
+
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
