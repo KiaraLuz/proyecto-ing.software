@@ -1,7 +1,8 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta, Cliente
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.utils import timezone
 
 class RolForm(forms.ModelForm):
     class Meta:
@@ -132,7 +133,7 @@ class ProductoForm(forms.ModelForm):
         label="Nombre del Producto", widget=forms.TextInput(attrs={"class": "input"})
     )
     descripcion = forms.CharField(
-        label="Decripcion", widget=forms.TextInput(attrs={"class": "input"})
+        label="Descripción", widget=forms.TextInput(attrs={"class": "input"})
     )
 
 class RecetaIngredienteForm(forms.ModelForm):
@@ -197,3 +198,28 @@ class ModificarGananciaForm(forms.ModelForm):
         fields = ['margen_ganancia']
 
     margen_ganancia = forms.DecimalField(max_digits=5, decimal_places=2, label="Margen de Ganancia (%)")
+
+class VentaForm(forms.ModelForm):
+    class Meta:
+        model = Venta
+        fields = ['cliente', 'producto', 'cantidad'] 
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cliente'].queryset = Cliente.objects.all()
+
+    def save(self, commit=True):
+        venta = super().save(commit=False)
+        if commit:
+            venta.save()
+        return venta
+
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nombre_cliente', 'correo_cliente', 'telefono_cliente']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['correo_cliente'].required = False
+        self.fields['telefono_cliente'].required = False

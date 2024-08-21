@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm
+from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia,Venta, Cliente
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm,VentaForm, ClienteForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -10,6 +10,14 @@ from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from decimal import Decimal
+from datetime import datetime
+import matplotlib
+matplotlib.use('Agg')  # Utiliza el backend 'Agg' para evitar problemas en entornos sin display
+import matplotlib.pyplot as plt
+import io
+import urllib, base64
+from django.utils import timezone
+from django.db.models import Sum
 
 # Create your views here.
 @login_required
@@ -112,14 +120,12 @@ def usuario_modificar(request, usuario_id):
     return render(request, "usuario/usuario_modificar.html", contexto)
 
 @login_required
-@admin_required
 def ingredientes(request):
     ingredientes = Ingrediente.objects.all()
     contexto = {"ingredientes": ingredientes}
     return render(request, "ingrediente/ingrediente.html", contexto)
 
 @login_required
-@admin_required
 def ingrediente_crear(request):
     if request.method == "POST":
         form = IngredienteForm(request.POST)
@@ -138,7 +144,6 @@ def ingrediente_crear(request):
     return render(request, "ingrediente/ingrediente_crear.html", contexto)
 
 @login_required
-@admin_required
 def ingrediente_modificar(request, ingrediente_id):
     ingrediente = get_object_or_404(Ingrediente, id_ingrediente=ingrediente_id)
     if request.method == "POST":
@@ -157,14 +162,12 @@ def ingrediente_modificar(request, ingrediente_id):
     return render(request, "ingrediente/ingrediente_modificar.html", {"form": form})
 
 @login_required
-@admin_required
 def productos(request):
     productos = Producto.objects.all()
     contexto = {"productos": productos}
     return render(request, "producto/producto.html", contexto)
 
 @login_required
-@admin_required
 def producto_crear(request):
     if request.method == "POST":
         form = ProductoForm(request.POST)
@@ -182,7 +185,6 @@ def producto_crear(request):
     return render(request, "producto/producto_crear.html", contexto)
 
 @login_required
-@admin_required
 def producto_modificar(request, producto_id):
     producto = get_object_or_404(Producto, id_producto=producto_id)
 
@@ -203,7 +205,6 @@ def producto_modificar(request, producto_id):
     return render(request, "producto/producto_modificar.html", contexto)
 
 @login_required
-@admin_required
 def recetas(request):
     recetas = Receta.objects.all()
     recetas_con_ingredientes = []
@@ -226,7 +227,6 @@ def recetas(request):
     return render(request, 'receta/recetas.html', contexto)
 
 @login_required
-@admin_required
 def receta_crear(request):
     if request.method == "POST":
         receta_form = RecetaForm(request.POST)
@@ -237,12 +237,10 @@ def receta_crear(request):
             ingrediente_formset.save()
             return redirect('recetas')
         else:
-            # Manejo de errores de validación
             print(receta_form.errors)
             print(ingrediente_formset.errors)
     else:
         receta_form = RecetaForm()
-        # Crear un formset con un formulario vacío inicial
         ingrediente_formset = RecetaIngredienteFormSet(prefix='ingrediente', queryset=RecetaIngrediente.objects.none())
 
     contexto = {
@@ -251,9 +249,7 @@ def receta_crear(request):
     }
     return render(request, 'receta/receta_crear.html', contexto)
 
-
 @login_required
-@admin_required
 def receta_modificar(request, receta_id):
     receta = get_object_or_404(Receta, id=receta_id)
 
@@ -274,8 +270,6 @@ def receta_modificar(request, receta_id):
         'ingrediente_formset': ingrediente_formset,
     }
     return render(request, 'receta/receta_modificar.html', contexto)
-
-
 
 @login_required
 @admin_required
@@ -378,19 +372,191 @@ def ganancia_modificar(request, ganancia_id):
         if form.is_valid():
             margen_ganancia = Decimal(form.cleaned_data['margen_ganancia'])
 
-            # Obtener el costo total desde CostoProducto relacionado al producto
             costo_total = CostoProducto.objects.get(producto__nombre_producto=ganancia.nombre_producto).costo_total
             
-            # Calcular el nuevo precio con el margen de ganancia
             precio_con_ganancia = costo_total + (costo_total * margen_ganancia / 100)
-            
-            # Actualizar el precio con ganancia sin guardar el margen
+        
             ganancia.precio_con_ganancia = precio_con_ganancia
             ganancia.save()
 
             messages.success(request, "El precio de ganancia ha sido actualizado exitosamente.")
-            return redirect('ganancias')  # Redirige a la vista de ganancia
+            return redirect('ganancias')
     else:
         form = ModificarGananciaForm()
 
     return render(request, 'ganancia/ganancia_modificar.html', {'form': form, 'ganancia': ganancia})
+
+@login_required
+def ventas(request):
+    ventas = Venta.objects.all()
+    return render(request, 'venta/ventas.html', {'ventas': ventas})
+
+@login_required
+def venta_crear(request):
+    if request.method == 'POST':
+        form = VentaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('ventas')
+    else:
+        form = VentaForm()
+        fecha_actual = datetime.now().strftime('%Y-%m-%d') 
+    return render(request, 'venta/venta_crear.html',  {'form': form, 'fecha_actual': fecha_actual})
+
+def obtener_precio(request):
+    nombre_producto = request.GET.get('nombre_producto')
+    try:
+        ganancia = Ganancia.objects.get(nombre_producto=nombre_producto)
+        precio = ganancia.precio_con_ganancia
+    except Ganancia.DoesNotExist:
+        precio = 0
+    return JsonResponse({'precio': precio})
+
+@login_required
+def clientes(request):
+    clientes = Cliente.objects.all()
+    return render(request, 'cliente/clientes.html', {'clientes': clientes}) 
+
+@login_required
+def cliente_crear(request):
+    if request.method == 'POST':
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('clientes')
+    else:
+        form = ClienteForm()
+
+    return render(request, 'cliente/cliente_crear.html', {'form': form})
+
+@login_required
+def cliente_modificar(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+
+    if request.method == 'POST':
+        form = ClienteForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            return redirect('clientes')
+    else:
+        form = ClienteForm(instance=cliente)
+    
+    return render(request, 'cliente/cliente_modificar.html', {'form': form, 'cliente': cliente})
+
+@login_required
+@admin_required
+def grafico_ganancias(request):
+    ahora = timezone.now()
+    ventas = Venta.objects.filter(fecha__year=ahora.year, fecha__month=ahora.month)
+    ganancias = {}
+
+    for producto in Producto.objects.all():
+        ventas_producto = ventas.filter(producto=producto)
+        cantidad_vendida = ventas_producto.aggregate(total=Sum('cantidad'))['total'] or 0
+        precio_venta_unidad = ventas_producto.first().precio if ventas_producto.exists() else 0
+
+        costo_producto_obj = CostoProducto.objects.filter(producto=producto).first()
+        costo_producto = costo_producto_obj.costo_total if costo_producto_obj else 0
+        
+        ganancia_total = (precio_venta_unidad - costo_producto) * cantidad_vendida
+        ganancias[producto.nombre_producto] = ganancia_total
+
+    productos = list(ganancias.keys())
+    ganancias = list(ganancias.values())
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bar_container = ax.bar(productos, ganancias, color='skyblue')
+    ax.set_xlabel('Productos')
+    ax.set_ylabel('Ganancia (S/.)')
+    ax.set_title('Ganancias Mensuales por Producto')
+    plt.xticks(rotation=45, ha='right')
+    ax.bar_label(bar_container, fmt='{:,.2f}', label_type='edge', padding=3)
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', bbox_inches='tight')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    buffer.close()
+    plt.close(fig)
+
+    return image_base64
+
+@login_required
+@admin_required
+def grafico_costos(request):
+    ahora = timezone.now()
+    ventas = Venta.objects.filter(fecha__year=ahora.year, fecha__month=ahora.month)
+    costos = {}
+
+    for producto in Producto.objects.all():
+        costo_producto_obj = CostoProducto.objects.filter(producto=producto).first()
+        costo_producto = costo_producto_obj.costo_total if costo_producto_obj else 0
+
+        cantidad_vendida = ventas.filter(producto=producto).aggregate(total=Sum('cantidad'))['total'] or 0
+
+        costo_total = costo_producto * cantidad_vendida
+        costos[producto.nombre_producto] = costo_total
+
+    productos = list(costos.keys())
+    costos = list(costos.values())
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bar_container = ax.bar(productos, costos, color='lightcoral')
+    ax.set_xlabel('Productos')
+    ax.set_ylabel('Costo Total (S/.)')
+    ax.set_title('Costos Mensuales por Producto')
+    plt.xticks(rotation=45, ha='right')
+    ax.bar_label(bar_container, fmt='{:,.2f}', label_type='edge', padding=3)
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', bbox_inches='tight')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    buffer.close()
+    plt.close(fig)
+
+    return image_base64
+
+@login_required
+@admin_required
+def grafico_ventas(request):
+    ahora = timezone.now()
+    ventas = Venta.objects.filter(fecha__year=ahora.year, fecha__month=ahora.month)
+    # Diccionario para traducir números de meses a nombres en español
+    meses_es = {
+        '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr', '05': 'May', '06': 'Jun',
+        '07': 'Jul', '08': 'Ago', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
+    }
+    meses = [f"{mes:02d}" for mes in range(1, 13)]
+    ventas_mensuales = []
+
+    for mes in meses:
+        ventas_mes = ventas.filter(fecha__month=mes).aggregate(total=Sum('cantidad'))['total'] or 0
+        ventas_mensuales.append(ventas_mes)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(meses, ventas_mensuales, marker='o', linestyle='-', color='teal')
+    ax.set_xlabel('Meses')
+    ax.set_ylabel('Ventas Totales (S/.)')
+    ax.set_title('Ventas Mensuales')
+    ax.set_xticks(meses)
+    ax.set_xticklabels([meses_es[mes] for mes in meses])
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', bbox_inches='tight')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    buffer.close()
+    plt.close(fig)
+
+    return image_base64
+
+@login_required
+@admin_required
+def dashboard(request):
+    grafico_ganancias_img = grafico_ganancias(request)
+    grafico_costos_img = grafico_costos(request)
+    grafico_ventas_img = grafico_ventas(request)
+
+    return render(request, 'dashboard/dashboard.html', {
+        'grafico_ganancias': grafico_ganancias_img,
+        'grafico_costos': grafico_costos_img,
+        'grafico_ventas': grafico_ventas_img
+    })
