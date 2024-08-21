@@ -10,7 +10,7 @@
       <td scope="col">Nombre</td>
       <td scope="col">Cantidad</td>
       <td scope="col">Unidad</td>
-      <td scope="col">Estado</td>
+      <!-- <td scope="col">Estado</td> -->
       <td scope="col">Precio (S/.)</td>
       <th colspan="2">Opciones</th>
     </tr>
@@ -22,7 +22,7 @@
         <td>{{ ingrediente.nombre_ingrediente }}</td>
         <td>{{ ingrediente.cantidad }}</td>
         <td>{{ ingrediente.unidad }}</td>
-        <td>{{ ingrediente.estado_ingrediente }}</td>
+        <!-- <td>{{ ingrediente.estado_ingrediente }}</td> -->
         <td>{{ ingrediente.precio_ingrediente }}</td>
         <td><a class="btn btn-color btn-m fw-bold" role="button" href="{% url 'ingrediente_modificar' ingrediente.id_ingrediente %}">
           <i class="bi bi-pencil-square"></i>
