@@ -3,7 +3,7 @@ from django.forms import inlineformset_factory
 from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta, Cliente
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils import timezone
-
+from .models import Transaccion
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
@@ -223,3 +223,25 @@ class ClienteForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['correo_cliente'].required = False
         self.fields['telefono_cliente'].required = False
+class TransaccionForm(forms.ModelForm):
+    class Meta:
+        model = Transaccion
+        fields = ['fecha', 'descripcion', 'tipo_transaccion', 'monto']
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'input'})
+    )
+    descripcion = forms.CharField(
+        label="Descripción",
+        widget=forms.Textarea(attrs={'class': 'input'})
+    )
+    tipo_transaccion = forms.ChoiceField(
+        label="Tipo de Transacción",
+        choices=Transaccion.TIPO_TRANSACCION_CHOICES,
+        widget=forms.Select(attrs={'class': 'input'})
+    )
+    monto = forms.DecimalField(
+        label="Monto",
+        widget=forms.NumberInput(attrs={'class': 'input'})
+    )

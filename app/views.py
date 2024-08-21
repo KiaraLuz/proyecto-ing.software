@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia,Venta, Cliente
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm,VentaForm, ClienteForm
+from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia,Venta, Cliente, Transaccion
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm,VentaForm, ClienteForm, TransaccionForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -560,3 +560,39 @@ def dashboard(request):
         'grafico_costos': grafico_costos_img,
         'grafico_ventas': grafico_ventas_img
     })
+@login_required
+@admin_required
+def transaccion(request):
+    transacciones = Transaccion.objects.all()  
+    return render(request, 'transaccion/transaccion.html', {'transacciones': transacciones})
+
+@login_required
+@admin_required
+def transaccion_crear(request):
+    if request.method == "POST":
+        form = TransaccionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('transaccion') 
+    else:
+        form = TransaccionForm()
+    return render(request, 'transaccion/transaccion_crear.html', {'form': form})
+
+@login_required
+@admin_required
+def transaccion_modificar(request, transaccion_id):
+    try:
+        transaccion = Transaccion.objects.get(id=transaccion_id)
+    except Transaccion.DoesNotExist:
+        # Manejo del error si la transacción no existe
+        return redirect('transaccion')
+
+    if request.method == "POST":
+        form = TransaccionForm(request.POST, instance=transaccion)
+        if form.is_valid():
+            form.save()
+            return redirect('transaccion')
+    else:
+        form = TransaccionForm(instance=transaccion)
+
+    return render(request, 'transaccion/transaccion_modificar.html', {'form': form})
