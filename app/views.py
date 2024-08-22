@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from app.models import Rol, Usuario, Ingrediente, Producto, Receta, RecetaIngrediente, CostoProducto, CostoProductoIngrediente, Ganancia,Venta, Cliente, Transaccion
-from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaForm, RecetaIngredienteFormSet, CostoProductoForm, RecetaIngredienteFormSetMod, GananciaForm, ModificarGananciaForm,VentaForm, ClienteForm, TransaccionForm
+from app.forms import RolForm, UsuarioForm, IngredienteForm, ProductoForm, RecetaCreateForm, RecetaIngredienteFormSetCreate, CostoProductoForm, RecetaIngredienteFormSetModify, GananciaForm, ModificarGananciaForm,VentaForm, ClienteForm, TransaccionForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -229,8 +229,8 @@ def recetas(request):
 @login_required
 def receta_crear(request):
     if request.method == "POST":
-        receta_form = RecetaForm(request.POST)
-        ingrediente_formset = RecetaIngredienteFormSet(request.POST, prefix='ingrediente')
+        receta_form = RecetaCreateForm(request.POST)
+        ingrediente_formset = RecetaIngredienteFormSetCreate(request.POST, prefix='ingrediente')
         if receta_form.is_valid() and ingrediente_formset.is_valid():
             receta = receta_form.save()
             ingrediente_formset.instance = receta
@@ -240,8 +240,8 @@ def receta_crear(request):
             print(receta_form.errors)
             print(ingrediente_formset.errors)
     else:
-        receta_form = RecetaForm()
-        ingrediente_formset = RecetaIngredienteFormSet(prefix='ingrediente', queryset=RecetaIngrediente.objects.none())
+        receta_form = RecetaCreateForm()
+        ingrediente_formset = RecetaIngredienteFormSetCreate(prefix='ingrediente', queryset=RecetaIngrediente.objects.none())
 
     contexto = {
         'receta_form': receta_form,
@@ -254,19 +254,17 @@ def receta_modificar(request, receta_id):
     receta = get_object_or_404(Receta, id=receta_id)
 
     if request.method == "POST":
-        receta_form = RecetaForm(request.POST, instance=receta)
-        ingrediente_formset = RecetaIngredienteFormSetMod(request.POST, instance=receta)
+        ingrediente_formset = RecetaIngredienteFormSetModify(request.POST, instance=receta)
 
-        if receta_form.is_valid() and ingrediente_formset.is_valid():
-            receta_form.save()
+        if ingrediente_formset.is_valid():
             ingrediente_formset.save()
             return redirect('recetas')
     else:
-        receta_form = RecetaForm(instance=receta)
-        ingrediente_formset = RecetaIngredienteFormSetMod(instance=receta)
+        
+        ingrediente_formset = RecetaIngredienteFormSetModify(instance=receta)
 
     contexto = {
-        'receta_form': receta_form,
+        'receta': receta,
         'ingrediente_formset': ingrediente_formset,
     }
     return render(request, 'receta/receta_modificar.html', contexto)

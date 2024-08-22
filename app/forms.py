@@ -146,7 +146,7 @@ class RecetaIngredienteForm(forms.ModelForm):
             'unidad': forms.Select(attrs={'class': 'form-control'}),
         }
 
-class RecetaForm(forms.ModelForm):
+class RecetaCreateForm(forms.ModelForm):
     class Meta:
         model = Receta
         fields = ['producto']
@@ -160,7 +160,22 @@ class RecetaForm(forms.ModelForm):
         productos_con_receta = Receta.objects.values_list('producto', flat=True)
         self.fields['producto'].queryset = Producto.objects.exclude(id_producto__in=productos_con_receta)
 
-RecetaIngredienteFormSet = inlineformset_factory(
+class RecetaModifyForm(forms.ModelForm):
+    class Meta:
+        model = Receta
+        fields = []  # No fields for modifying recipe itself
+
+class RecetaIngredienteForm(forms.ModelForm):
+    class Meta:
+        model = RecetaIngrediente
+        fields = ['ingrediente', 'cantidad', 'unidad']
+        widgets = {
+            'ingrediente': forms.Select(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'unidad': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+RecetaIngredienteFormSetCreate = inlineformset_factory(
     Receta,
     RecetaIngrediente,
     form=RecetaIngredienteForm,
@@ -169,7 +184,7 @@ RecetaIngredienteFormSet = inlineformset_factory(
     extra=1
 )
 
-RecetaIngredienteFormSetMod = inlineformset_factory(
+RecetaIngredienteFormSetModify = inlineformset_factory(
     Receta,
     RecetaIngrediente,
     form=RecetaIngredienteForm,
