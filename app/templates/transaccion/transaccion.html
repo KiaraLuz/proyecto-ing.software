@@ -1,0 +1,35 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Lista de Transacciones</h1>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'transaccion_crear' %}" role="button">Crear</a>
+<table class="tb">
+  <thead class="encabezado-tabla fw-bold">
+    <tr>
+
+        <td scope="col">Fecha</td>
+        <td scope="col">Descripción</td>
+        <td scope="col">Tipo de transacción</td>
+        <td scope="col">Monto (S/.)</td>
+        <th colspan="2">Opciones</th>
+    </tr>
+  </thead>
+  <tbody class="bg-secondary-subtle">
+    {% for transaccion in transacciones %}
+    <tr>
+
+        <td>{{ transaccion.fecha }}</td>
+        <td>{{ transaccion.descripcion }}</td>
+        <td>{{ transaccion.get_tipo_transaccion_display }}</td>
+        <td>{{ transaccion.monto }}</td>
+        <td>
+            <a class="btn btn-color btn-m fw-bold" role="button" href="{% url 'transaccion_modificar' transaccion.id %}">
+                <i class="bi bi-pencil-square"></i>
+                Modificar
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

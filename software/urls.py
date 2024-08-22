@@ -52,4 +52,7 @@ urlpatterns = [
     path('clientes/crear/', views.cliente_crear, name='cliente_crear'),
     path('clientes/modificar/<int:cliente_id>/', views.cliente_modificar, name='cliente_modificar'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('transaccion/', views.transaccion, name='transaccion'),
+    path('transaccion/crear/', views.transaccion_crear, name='transaccion_crear'),
+    path('transaccion/modificar/<int:transaccion_id>/', views.transaccion_modificar, name='transaccion_modificar')
 ]
