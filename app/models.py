@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils import timezone
 
 # Create your models here.
 class Rol(models.Model):
@@ -89,7 +91,7 @@ class CostoProductoIngrediente(models.Model):
 
     def __str__(self):
         return f"{self.costo_producto.producto.nombre_producto} - {self.ingrediente.nombre_ingrediente}: {self.costo_total}"
-    
+
 class Ganancia(models.Model):
     id_ganancia = models.AutoField(primary_key=True)
     nombre_producto = models.CharField(max_length=100)
@@ -99,17 +101,37 @@ class Ganancia(models.Model):
     def __str__(self):
         return f'Ganancia para {self.nombre_producto}'
 
+class Cliente(models.Model):
+    id_cliente = models.AutoField(primary_key=True)
+    nombre_cliente = models.CharField(max_length=100)
+    correo_cliente = models.EmailField(blank=True, null=True)
+    telefono_cliente = models.CharField(max_length=9,blank=True, null=True)
+    def __str__(self):
+        return self.nombre_cliente
+
 class Venta(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
     precio = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
     fecha = models.DateField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        # Obtiene el precio de ganancia para el producto seleccionado
         try:
             ganancia = Ganancia.objects.get(nombre_producto=self.producto.nombre_producto)
             self.precio = ganancia.precio_con_ganancia
         except Ganancia.DoesNotExist:
-            self.precio = 0  # O algún valor predeterminado si no se encuentra ganancia
+            self.precio = 0
         super().save(*args, **kwargs)
+class Transaccion(models.Model):
+    TIPO_TRANSACCION_CHOICES = [
+        ('ingreso', 'Ingreso'),
+        ('egreso', 'Egreso'),
+    ]
+    fecha = models.DateField(default=timezone.now)
+    descripcion = models.TextField()
+    tipo_transaccion = models.CharField(max_length=7, choices=TIPO_TRANSACCION_CHOICES)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.fecha} - {self.descripcion} - {self.tipo_transaccion} - {self.monto}"

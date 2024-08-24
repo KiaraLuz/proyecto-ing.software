@@ -1,0 +1,27 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="card p-4">
+    <h2>Ganancias Mensuales por Producto</h2>
+    <div style="max-width: 800px; margin: 0 auto;">
+        <img src="data:image/png;base64,{{ grafico_ganancias }}" alt="Gráfico de Ganancias" class="grafico-img">
+    </div>
+</div>
+
+<div class="card p-4">
+    <h2>Costos Mensuales por Producto</h2>
+    <div style="max-width: 800px; margin: 0 auto;">
+        <img src="data:image/png;base64,{{ grafico_costos }}" alt="Gráfico de Costos" class="grafico-img">
+    </div>
+</div>
+
+<div class="card p-4">
+    <h2>Ventas Mensuales</h2>
+    <div style="max-width: 800px; margin: 0 auto;">
+        <img src="data:image/png;base64,{{ grafico_ventas }}" alt="Gráfico de Ventas Mensuales" class="grafico-img">
+    </div>
+</div>
+
+{% endblock %}

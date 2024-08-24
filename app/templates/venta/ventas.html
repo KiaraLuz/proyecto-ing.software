@@ -3,16 +3,15 @@
 {% block content %}
 <h1>Lista de Ventas</h1>
 
-<!-- Botón para crear nuevas ventas -->
-<a class="btn btn-color fw-bold mb-3" href="{% url 'venta_crear' %}" role="button">Crear Venta</a>
+<a class="btn btn-color fw-bold mb-3" href="{% url 'venta_crear' %}" role="button">Crear</a>
 
-<!-- Tabla de ventas -->
 <table class="tb">
   <thead class="encabezado-tabla fw-bold">
     <tr>
       <th>Producto</th>
       <th>Cantidad</th>
       <th>Precio</th>
+      <th>Cliente</th>
       <th>Fecha</th>
     </tr>
   </thead>
@@ -22,6 +21,7 @@
         <td>{{ venta.producto.nombre_producto }}</td>
         <td>{{ venta.cantidad }}</td>
         <td>${{ venta.precio }}</td>
+        <td>{{ venta.cliente }}</td>
         <td>{{ venta.fecha }}</td>
     </tr>
     {% endfor %}

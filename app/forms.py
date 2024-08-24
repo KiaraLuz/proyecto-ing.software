@@ -1,8 +1,9 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta
+from .models import Rol, Usuario, Ingrediente, UnidadesMedida, Producto, RecetaIngrediente,Receta, CostoProducto, Ganancia,Venta, Cliente
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils import timezone
+from .models import Transaccion
 class RolForm(forms.ModelForm):
     class Meta:
         model = Rol
@@ -132,7 +133,7 @@ class ProductoForm(forms.ModelForm):
         label="Nombre del Producto", widget=forms.TextInput(attrs={"class": "input"})
     )
     descripcion = forms.CharField(
-        label="Decripcion", widget=forms.TextInput(attrs={"class": "input"})
+        label="Descripción", widget=forms.TextInput(attrs={"class": "input"})
     )
 
 class RecetaIngredienteForm(forms.ModelForm):
@@ -145,7 +146,7 @@ class RecetaIngredienteForm(forms.ModelForm):
             'unidad': forms.Select(attrs={'class': 'form-control'}),
         }
 
-class RecetaForm(forms.ModelForm):
+class RecetaCreateForm(forms.ModelForm):
     class Meta:
         model = Receta
         fields = ['producto']
@@ -159,7 +160,22 @@ class RecetaForm(forms.ModelForm):
         productos_con_receta = Receta.objects.values_list('producto', flat=True)
         self.fields['producto'].queryset = Producto.objects.exclude(id_producto__in=productos_con_receta)
 
-RecetaIngredienteFormSet = inlineformset_factory(
+class RecetaModifyForm(forms.ModelForm):
+    class Meta:
+        model = Receta
+        fields = []  # No fields for modifying recipe itself
+
+class RecetaIngredienteForm(forms.ModelForm):
+    class Meta:
+        model = RecetaIngrediente
+        fields = ['ingrediente', 'cantidad', 'unidad']
+        widgets = {
+            'ingrediente': forms.Select(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'unidad': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+RecetaIngredienteFormSetCreate = inlineformset_factory(
     Receta,
     RecetaIngrediente,
     form=RecetaIngredienteForm,
@@ -168,7 +184,7 @@ RecetaIngredienteFormSet = inlineformset_factory(
     extra=1
 )
 
-RecetaIngredienteFormSetMod = inlineformset_factory(
+RecetaIngredienteFormSetModify = inlineformset_factory(
     Receta,
     RecetaIngrediente,
     form=RecetaIngredienteForm,
@@ -201,11 +217,46 @@ class ModificarGananciaForm(forms.ModelForm):
 class VentaForm(forms.ModelForm):
     class Meta:
         model = Venta
-        fields = ['producto', 'cantidad']  # No incluir 'fecha' y 'precio' aquí
+        fields = ['cliente', 'producto', 'cantidad'] 
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cliente'].queryset = Cliente.objects.all()
 
     def save(self, commit=True):
         venta = super().save(commit=False)
-        # No necesitas establecer 'fecha' aquí ya que 'auto_now_add' lo maneja el modelo
         if commit:
             venta.save()
         return venta
+
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nombre_cliente', 'correo_cliente', 'telefono_cliente']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['correo_cliente'].required = False
+        self.fields['telefono_cliente'].required = False
+class TransaccionForm(forms.ModelForm):
+    class Meta:
+        model = Transaccion
+        fields = ['fecha', 'descripcion', 'tipo_transaccion', 'monto']
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'input'})
+    )
+    descripcion = forms.CharField(
+        label="Descripción",
+        widget=forms.Textarea(attrs={'class': 'input'})
+    )
+    tipo_transaccion = forms.ChoiceField(
+        label="Tipo de Transacción",
+        choices=Transaccion.TIPO_TRANSACCION_CHOICES,
+        widget=forms.Select(attrs={'class': 'input'})
+    )
+    monto = forms.DecimalField(
+        label="Monto",
+        widget=forms.NumberInput(attrs={'class': 'input'})
+    )

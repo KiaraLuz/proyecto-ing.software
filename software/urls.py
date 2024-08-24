@@ -45,7 +45,14 @@ urlpatterns = [
     path('ganancias/', views.ganancia, name='ganancias'),
     path('ganancia/crear/', views.ganancia_crear, name='ganancia_crear'),
     path('ganancia/modificar/<int:ganancia_id>/', views.ganancia_modificar, name='ganancia_modificar'),
-    path('ventas/', views.venta_listar, name='venta_listar'),
-    path('ventas/crear/', views.venta_crear, name='venta_crear'),
+    path('ventas/', views.ventas, name='ventas'),
+    path('venta/crear/', views.venta_crear, name='venta_crear'),
     path('obtener_precio/',views.obtener_precio, name='obtener_precio'),
+    path('clientes/', views.clientes, name='clientes'),
+    path('clientes/crear/', views.cliente_crear, name='cliente_crear'),
+    path('clientes/modificar/<int:cliente_id>/', views.cliente_modificar, name='cliente_modificar'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('transaccion/', views.transaccion, name='transaccion'),
+    path('transaccion/crear/', views.transaccion_crear, name='transaccion_crear'),
+    path('transaccion/modificar/<int:transaccion_id>/', views.transaccion_modificar, name='transaccion_modificar')
 ]
